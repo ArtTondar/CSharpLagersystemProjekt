@@ -2,6 +2,58 @@
 
 <PageTitle>Product</PageTitle>
 
-<div class="product-container">
+<div class="outer-container">
     <h4>Produkt Oversigt</h4>
+
+    <!-- Label Row -->
+    <div class="row filter-labels">
+
+        <div class="col-2">
+            <small class="text-muted">Sorter tabel efter</small>
+        </div>
+
+        <div class="col-8">
+        </div>
+
+        <div class="col-2">
+            <small class="text-muted">Antal Produkter pr. Side</small>
+        </div>
+
+    </div>
+
+    <!-- Filter Row -->
+    <div class="row product-filters">
+
+        <div class="col-2">
+            <select class="form-select">
+                <option>Name</option>
+                <option>Description</option>
+                <option>UnitPrice</option>
+                <option>Size</option>
+                <option>Warehouse</option>
+                <option>UnitStock</option>
+                <option>UnitStatus</option>
+            </select>
+        </div>
+
+        <div class="col-6">
+            <input class="form-control" placeholder="Søg efter produktnavn..." />
+        </div>
+
+        <div class="col-2">
+            <button class="btn btn-primary w-100">
+                Søg
+            </button>
+        </div>
+
+        <div class="col-2">
+            <select class="form-select">
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+            </select>
+        </div>
+
+    </div>
 </div>
