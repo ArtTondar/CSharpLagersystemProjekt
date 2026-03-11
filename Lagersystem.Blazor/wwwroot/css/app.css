@@ -114,8 +114,25 @@ code {
     text-align: start;
 }
 
+/* Navigation Buttons */
 .nav-menu-icon {
     margin-right: 15px;
     font-size: 1.25rem;
     margin-bottom: 25px;
+}
+
+/* Outer Container */
+.product-container {
+    margin: 40px auto;
+    padding: 25px;
+    width: 95%;
+    background-color: #efefef;
+    border: 1px solid #cfcfcf;
+    min-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.product-container h4 {
+    font-weight: 700;
 }
