@@ -113,3 +113,9 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.nav-menu-icon {
+    margin-right: 15px;
+    font-size: 1.25rem;
+    margin-bottom: 25px;
+}
