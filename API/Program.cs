@@ -29,4 +29,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+//var dbSeeder = new DbSeeder(); <- for seeding purposes
+
 app.Run();
