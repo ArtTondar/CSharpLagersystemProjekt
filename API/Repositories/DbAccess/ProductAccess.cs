@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using API.Repositories.DbAccess.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Repositories.DbAccess
