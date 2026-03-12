@@ -11,8 +11,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductService, ProductApiService>();
         services.AddScoped<IOrderService, OrderApiService>();
         services.AddScoped<ICustomerService, CustomerApiService>();
+
         services.AddScoped<ProductState>();
         services.AddScoped<OrderState>();
+        services.AddScoped<CustomerState>();
         return services;
     }
 }
