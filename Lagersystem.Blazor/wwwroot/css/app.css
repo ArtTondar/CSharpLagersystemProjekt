@@ -165,3 +165,43 @@ code {
     border-radius: 4px;
     background-color: #f3f3f3;
 }
+
+/* Remove the Bootstrap padding only for the Home page */
+.content:has(.home-background) {
+    padding: 0 !important;
+}
+
+/* Background image */
+.home-background {
+    height: calc(100vh - 56px);
+    width: 100%;
+    background-image: url('/images/shipping.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Center text inside the background */
+.home-text {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    background-color: rgba(0, 32, 96, 0.40);
+    padding: 40px;
+}
+
+/* Large main title */
+.home-text h1 {
+    font-size: 4rem;
+    font-weight: 700;
+}
+
+/* Subtitle */
+.home-text h2 {
+    font-size: 2rem;
+    font-weight: 400;
+}
