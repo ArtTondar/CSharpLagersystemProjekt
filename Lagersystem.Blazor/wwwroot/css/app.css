@@ -168,9 +168,7 @@ code {
 
 /* Remove the Bootstrap padding only for the Home page */
 .content:has(.home-background) {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    padding-top: 0 !important;
+    padding: 0 !important;
 }
 
 /* Background image */
