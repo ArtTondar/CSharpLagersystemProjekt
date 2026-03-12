@@ -1,6 +1,6 @@
 ﻿namespace Lagersystem.Blazor.Models.Dtos;
 
-public class CustomerDto
+public class UserDto
 {
     public Guid Id { get; set; }
 
@@ -8,13 +8,7 @@ public class CustomerDto
 
     public string Email { get; set; } = string.Empty;
 
-    public string City { get; set; } = string.Empty;
-
-    public string Street { get; set; } = string.Empty;
-
-    public string ZipCode { get; set; } = string.Empty;
-
     public string Phone { get; set; } = string.Empty;
 
-    public string CVR { get; set; } = string.Empty;
+    public bool IsAdmin { get; set; }
 }
