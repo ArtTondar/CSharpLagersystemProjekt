@@ -122,7 +122,7 @@ code {
 }
 
 /* Outer Container */
-.product-container {
+.outer-container {
     margin: 40px auto;
     padding: 25px;
     width: 95%;
@@ -133,6 +133,11 @@ code {
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.product-container h4 {
-    font-weight: 700;
+.outer-container h4 {
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.table-container {
+    margin-top: 25px;
 }
