@@ -12,7 +12,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.5" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Models\" />
 		<Folder Include="API\" />
 		<Folder Include="Extensions\" />
 		<Folder Include="Utilities\" />
