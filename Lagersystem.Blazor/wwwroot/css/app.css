@@ -205,3 +205,60 @@ code {
     font-size: 2rem;
     font-weight: 400;
 }
+
+/* Login Page */
+.login-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    background-color: #efefef;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+/* Login Title */
+.login-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* .login Subtitle */
+.login-subtitle {
+    margin-bottom: 30px;
+}
+
+/* Login Fields */
+.login-field {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.login-field label {
+    font-weight: 500;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Login Button */
+.login-button {
+    width: 100%;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+/* Footer text */
+.login-footer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+}
