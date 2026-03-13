@@ -13,6 +13,15 @@ public class ProductState
 
     public bool IsLoading { get; private set; }
 
+    public string SearchTerm { get; set; } = string.Empty;
+
+    public IReadOnlyList<ProductDto> FilteredProducts =>
+        string.IsNullOrWhiteSpace(SearchTerm)
+            ? Products
+            : Products
+                .Where(product => product.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
     public ProductState(IProductService productService)
     {
         _productService = productService;
@@ -49,5 +58,10 @@ public class ProductState
     public void ClearSelectedProduct()
     {
         SelectedProduct = null;
+    }
+
+    public void ClearSearch()
+    {
+        SearchTerm = string.Empty;
     }
 }
