@@ -23,6 +23,7 @@ namespace API.Repositories
             return await _dbContext.Products.ToListAsync();
         }
 
+<<<<<<< HEAD
         public async Task UpdateProduct(Product product)
         {
             _dbContext.Products.Update(product);
@@ -34,6 +35,18 @@ namespace API.Repositories
             _dbContext.Products.Remove(product);      
             await _dbContext.SaveChangesAsync();
                 
+=======
+        public void UpdateProduct(Product product)
+        {
+            _dbContext.Products.Update(product);
+        }
+
+        public async Task DeleteProduct(Guid productId)
+        {
+            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            if (product != null)
+                _dbContext.Products.Remove(product);
+>>>>>>> d17f8e9334f858f0bc1412aea9414c23dce4f3f4
         }
 
         public async Task<List<Product>> GetProductsByName(string name)
@@ -57,7 +70,11 @@ namespace API.Repositories
             return await _dbContext.Products.Where(p => p.Size == size).ToListAsync();
         }
 
+<<<<<<< HEAD
         public async Task<List<Product>> GetProductsByWarehouse(string warehouse)
+=======
+        public async Task<List<Product>> GetproductsByWarehouse(string warehouse)
+>>>>>>> d17f8e9334f858f0bc1412aea9414c23dce4f3f4
         {
             return await _dbContext.Products.Where(p => p.Warehouse == warehouse).ToListAsync();
         }
@@ -67,12 +84,19 @@ namespace API.Repositories
             return await _dbContext.Products.Where(p => p.UnitStatus == unitStatus).ToListAsync();
         }
 
+<<<<<<< HEAD
         public async Task<Product> CreateProduct(Product product)
         {
             await _dbContext.Products.AddAsync(product);
             await _dbContext.SaveChangesAsync();
 
             return product;
+=======
+        public async Task CreateProduct(Product product)
+        {
+            await _dbContext.Products.AddAsync(product);
+            await _dbContext.SaveChangesAsync();
+>>>>>>> d17f8e9334f858f0bc1412aea9414c23dce4f3f4
         }
 
         public async Task<List<Product>> GetProductsByUnitStock(int unitStock)
