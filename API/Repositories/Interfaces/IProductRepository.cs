@@ -18,11 +18,9 @@ namespace API.Repositories.Interfaces
 
         public Task<List<Product>> GetProductsByWarehouse(string warehouse);
 
-
         public Task<List<Product>> GetProductsByUnitStock(int unitStock);
 
         public  Task<List<Product>> GetProductsByUnitStatus(UnitStatus unitStatus);
-
 
         public Task<Product> CreateProduct(Product product);
 
