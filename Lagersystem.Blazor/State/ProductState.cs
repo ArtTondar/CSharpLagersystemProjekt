@@ -15,12 +15,27 @@ public class ProductState
 
     public string SearchTerm { get; set; } = string.Empty;
 
+    public int? SelectedSize { get; set; }
+
+    public string SelectedWarehouse { get; set; } = string.Empty;
+
+    public UnitStatus? SelectedUnitStatus { get; set; }
+
     public IReadOnlyList<ProductDto> FilteredProducts =>
-        string.IsNullOrWhiteSpace(SearchTerm)
-            ? Products
-            : Products
-                .Where(product => product.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+        Products
+            .Where(product =>
+                string.IsNullOrWhiteSpace(SearchTerm) ||
+                product.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+            .Where(product =>
+                !SelectedSize.HasValue ||
+                product.Size == SelectedSize.Value)
+            .Where(product =>
+                string.IsNullOrWhiteSpace(SelectedWarehouse) ||
+                product.Warehouse.Contains(SelectedWarehouse, StringComparison.OrdinalIgnoreCase))
+            .Where(product =>
+                !SelectedUnitStatus.HasValue ||
+                product.UnitStatus == SelectedUnitStatus.Value)
+            .ToList();
 
     public ProductState(IProductService productService)
     {
@@ -63,5 +78,18 @@ public class ProductState
     public void ClearSearch()
     {
         SearchTerm = string.Empty;
+    }
+
+    public void ClearFilters()
+    {
+        SelectedSize = null;
+        SelectedWarehouse = string.Empty;
+        SelectedUnitStatus = null;
+    }
+
+    public void ClearAllFilters()
+    {
+        ClearSearch();
+        ClearFilters();
     }
 }
