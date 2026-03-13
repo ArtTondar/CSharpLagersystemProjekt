@@ -21,21 +21,73 @@ public class ProductState
 
     public UnitStatus? SelectedUnitStatus { get; set; }
 
-    public IReadOnlyList<ProductDto> FilteredProducts =>
-        Products
-            .Where(product =>
-                string.IsNullOrWhiteSpace(SearchTerm) ||
-                product.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
-            .Where(product =>
-                !SelectedSize.HasValue ||
-                product.Size == SelectedSize.Value)
-            .Where(product =>
-                string.IsNullOrWhiteSpace(SelectedWarehouse) ||
-                product.Warehouse.Contains(SelectedWarehouse, StringComparison.OrdinalIgnoreCase))
-            .Where(product =>
-                !SelectedUnitStatus.HasValue ||
-                product.UnitStatus == SelectedUnitStatus.Value)
-            .ToList();
+    public string SortField { get; set; } = "Name";
+
+    public bool SortDescending { get; set; }
+
+    public IReadOnlyList<ProductDto> FilteredProducts
+    {
+        get
+        {
+            IEnumerable<ProductDto> result = Products;
+
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                result = result.Where(product =>
+                    product.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    product.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (SelectedSize.HasValue)
+            {
+                result = result.Where(product => product.Size == SelectedSize.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(SelectedWarehouse))
+            {
+                result = result.Where(product =>
+                    product.Warehouse.Contains(SelectedWarehouse, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (SelectedUnitStatus.HasValue)
+            {
+                result = result.Where(product => product.UnitStatus == SelectedUnitStatus.Value);
+            }
+
+            result = SortField switch
+            {
+                "Description" => SortDescending
+                    ? result.OrderByDescending(product => product.Description)
+                    : result.OrderBy(product => product.Description),
+
+                "UnitPrice" => SortDescending
+                    ? result.OrderByDescending(product => product.UnitPrice)
+                    : result.OrderBy(product => product.UnitPrice),
+
+                "Size" => SortDescending
+                    ? result.OrderByDescending(product => product.Size)
+                    : result.OrderBy(product => product.Size),
+
+                "Warehouse" => SortDescending
+                    ? result.OrderByDescending(product => product.Warehouse)
+                    : result.OrderBy(product => product.Warehouse),
+
+                "UnitStock" => SortDescending
+                    ? result.OrderByDescending(product => product.UnitStock)
+                    : result.OrderBy(product => product.UnitStock),
+
+                "UnitStatus" => SortDescending
+                    ? result.OrderByDescending(product => product.UnitStatus)
+                    : result.OrderBy(product => product.UnitStatus),
+
+                _ => SortDescending
+                    ? result.OrderByDescending(product => product.Name)
+                    : result.OrderBy(product => product.Name)
+            };
+
+            return result.ToList();
+        }
+    }
 
     public ProductState(IProductService productService)
     {
@@ -70,26 +122,18 @@ public class ProductState
         }
     }
 
-    public void ClearSelectedProduct()
+    public void SelectProduct(ProductDto product)
     {
-        SelectedProduct = null;
-    }
-
-    public void ClearSearch()
-    {
-        SearchTerm = string.Empty;
-    }
-
-    public void ClearFilters()
-    {
-        SelectedSize = null;
-        SelectedWarehouse = string.Empty;
-        SelectedUnitStatus = null;
+        SelectedProduct = product;
     }
 
     public void ClearAllFilters()
     {
-        ClearSearch();
-        ClearFilters();
+        SearchTerm = string.Empty;
+        SelectedSize = null;
+        SelectedWarehouse = string.Empty;
+        SelectedUnitStatus = null;
+        SortField = "Name";
+        SortDescending = false;
     }
 }
