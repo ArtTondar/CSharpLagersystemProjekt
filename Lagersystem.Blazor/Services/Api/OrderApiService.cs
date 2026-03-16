@@ -78,19 +78,16 @@ public class OrderApiService : IOrderService
         await ApiResponseHandler.EnsureSuccessAsync(response);
     }
 
-    public Task UpdateOrderAsync(Guid id, UpdateOrderRequest request)
+    public async Task UpdateOrderAsync(Guid id, UpdateOrderRequest request)
     {
-        // Placeholder:
-        // Denne metode er endnu ikke aktiveret.
-        //
-        // API'et forventer en Order-model med Id i body,
-        // og update-requesten matcher endnu ikke det krav.
-        //
-        // Derfor forbliver update slået fra,
-        // indtil request-modellen og API-modellen passer sammen.
+        // Opdaterer en eksisterende ordre via PUT.
+        // Id sendes både i route og i request body,
+        // fordi API'et sammenligner route-id med order.Id.
+        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/Order/{id}", request);
 
-        throw new NotImplementedException(
-            "UpdateOrderAsync er ikke aktiveret endnu, fordi request-modellen ikke matcher API'et.");
+        // Sikrer at API-kaldet lykkedes.
+        // Hvis ikke, kastes en tydelig fejl.
+        await ApiResponseHandler.EnsureSuccessAsync(response);
     }
 
     public async Task DeleteOrderAsync(Guid id)

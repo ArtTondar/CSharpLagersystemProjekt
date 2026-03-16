@@ -113,11 +113,18 @@ public class OrderState
 
         try
         {
-            // Placeholder:
-            // Service-metoden findes, men backend er endnu ikke sikker at ramme
-            // for update, så denne kan kommenteres ud senere hvis nødvendigt.
+            // Opdaterer ordren via service-laget.
             await _orderService.UpdateOrderAsync(id, request);
 
+            // Hvis den opdaterede ordre er valgt i UI'et,
+            // hentes den igen for at vise de nyeste data.
+            if (SelectedOrder?.Id == id)
+            {
+                await LoadOrderByIdAsync(id);
+            }
+
+            // Genindlæser listen efter opdatering,
+            // så tabellen viser de nyeste data.
             await LoadOrdersAsync();
         }
         finally

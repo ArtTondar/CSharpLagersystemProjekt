@@ -1,6 +1,7 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
 using Lagersystem.Blazor.State;
 using Microsoft.AspNetCore.Components;
+using Lagersystem.Blazor.Models.Requests;
 
 namespace Lagersystem.Blazor.Pages;
 
@@ -71,6 +72,37 @@ public partial class OrderView
         catch (Exception ex)
         {
             SetError($"Fejl ved hentning af valgt ordre: {ex.Message}");
+        }
+    }
+
+    public async Task UpdateSelectedOrderAsync()
+    {
+        ClearError();
+
+        if (SelectedOrder is null)
+        {
+            SetError("Der skal vælges en ordre før opdatering.");
+            return;
+        }
+
+        try
+        {
+            // Bygger en update-request ud fra den valgte ordre.
+            // Her genbruges de nuværende værdier som simpel test.
+            UpdateOrderRequest request = new()
+            {
+                Id = SelectedOrder.Id,
+                CustomerId = SelectedOrder.CustomerId,
+                OrderDate = SelectedOrder.OrderDate,
+                TotalPrice = SelectedOrder.TotalPrice
+            };
+
+            // Kalder state-laget, som derefter opdaterer via API'et.
+            await OrderState.UpdateOrderAsync(SelectedOrder.Id, request);
+        }
+        catch (Exception ex)
+        {
+            SetError($"Fejl ved opdatering af ordre: {ex.Message}");
         }
     }
 
