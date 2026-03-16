@@ -56,6 +56,11 @@ namespace API.Repositories
             return  await _dbContext.Orders.Where(o=> o.TotalPrice == totalPrice).ToListAsync();
         }
 
+        public async Task<List<Order>> GetByCustomerId(Guid customerId)
+        {
+            return await _dbContext.Orders.Where(o => o.CustomerId == customerId).ToListAsync();
+        }
+
         public async Task Update(Order order)
         {
             _dbContext.Orders.Update(order);

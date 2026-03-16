@@ -12,6 +12,8 @@ namespace API.Repositories.Interfaces
 
         public Task<List<Order>> GetByTotalPrice(decimal totalPrice);
 
+        public Task<List<Order>> GetByCustomerId(Guid customerId);
+
         public Task<Order> Create(Order order);
 
         public Task Update(Order order);
