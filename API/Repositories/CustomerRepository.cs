@@ -27,27 +27,28 @@ namespace API.Repositories
 
         public async Task<List<Customer>> GetAll()
         {
-            return await _dbContext.Customers.ToListAsync();
+            return await _dbContext.Customers.AsNoTracking().ToListAsync();
         }
 
         public async Task<Customer?> GetByEmail(string email)
         {
-            return await _dbContext.Customers.Where(c=>c.Email == email).FirstOrDefaultAsync();
+            return await _dbContext.Customers.Where(c=>c.Email == email).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<Customer?> GetById(Guid id)
         {
-            return await _dbContext.Customers.Where(c => c.Id == id).FirstOrDefaultAsync();
+            return await _dbContext.Customers.Where(c => c.Id == id).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<Customer?> GetByPhone(string phone)
         {
-            return await _dbContext.Customers.Where(c => c.Phone == phone).FirstOrDefaultAsync();
+            return await _dbContext.Customers.Where(c => c.Phone == phone).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task Update(Customer customer)
         {
-            _dbContext.Customers.Update(customer);
+            _dbContext.Customers.Attach(customer);
+            _dbContext.Entry(customer).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
     }
