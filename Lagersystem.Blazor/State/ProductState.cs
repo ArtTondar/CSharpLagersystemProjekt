@@ -122,7 +122,103 @@ public class ProductState
             IsLoading = false;
         }
     }
+    public async Task LoadProductsByNameAsync(string name)
+    {
+        IsLoading = true;
 
+        try
+        {
+            Products = await _productService.GetProductsByNameAsync(name);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task LoadProductsByDescriptionAsync(string description)
+    {
+        IsLoading = true;
+
+        try
+        {
+            Products = await _productService.GetProductsByDescriptionAsync(description);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task LoadProductsByUnitPriceAsync(decimal unitPrice)
+    {
+        IsLoading = true;
+
+        try
+        {
+            Products = await _productService.GetProductsByUnitPriceAsync(unitPrice);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task LoadProductsBySizeAsync(int size)
+    {
+        IsLoading = true;
+
+        try
+        {
+            Products = await _productService.GetProductsBySizeAsync(size);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task LoadProductsByWarehouseAsync(string warehouse)
+    {
+        IsLoading = true;
+
+        try
+        {
+            Products = await _productService.GetProductsByWarehouseAsync(warehouse);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task LoadProductsByUnitStockAsync(int unitStock)
+    {
+        IsLoading = true;
+
+        try
+        {
+            Products = await _productService.GetProductsByUnitStockAsync(unitStock);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task LoadProductsByUnitStatusAsync(int unitStatus)
+    {
+        IsLoading = true;
+
+        try
+        {
+            Products = await _productService.GetProductsByUnitStatusAsync(unitStatus);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
     public async Task CreateProductAsync(CreateProductRequest request)
     {
         IsLoading = true;
