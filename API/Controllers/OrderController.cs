@@ -113,7 +113,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrder(Guid id, Order order)
+        public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] Order order)
         {
             if (!ModelState.IsValid)
             {
