@@ -29,7 +29,7 @@ namespace API.Repositories
 
         public async Task<List<Order>> GetAll()
         {
-            return await _dbContext.Orders.ToListAsync();
+            return await _dbContext.Orders.AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Order>> GetByDate(DateTime start, DateTime? end = null)
@@ -37,23 +37,23 @@ namespace API.Repositories
             if (end == null)
             {
                 return await _dbContext.Orders
-                    .Where(o => o.OrderDate >= start)
+                    .Where(o => o.OrderDate >= start).AsNoTracking()
                     .ToListAsync();
             }
 
             return await _dbContext.Orders
                 .Where(o => o.OrderDate >= start && o.OrderDate <= end)
-                .ToListAsync();
+                .AsNoTracking().ToListAsync();
         }
 
         public async Task<Order?> GetById(Guid id)
         {
-            return await _dbContext.Orders.FirstOrDefaultAsync(o=> o.Id == id);
+            return await _dbContext.Orders.AsNoTracking().FirstOrDefaultAsync(o=> o.Id == id);
         }
 
         public async Task<List<Order>> GetByTotalPrice(decimal totalPrice)
         {
-            return  await _dbContext.Orders.Where(o=> o.TotalPrice == totalPrice).ToListAsync();
+            return  await _dbContext.Orders.Where(o=> o.TotalPrice == totalPrice).AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Order>> GetByCustomerId(Guid customerId)
@@ -63,7 +63,8 @@ namespace API.Repositories
 
         public async Task Update(Order order)
         {
-            _dbContext.Orders.Update(order);
+            _dbContext.Orders.Attach(order);
+            _dbContext.Entry(order).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
     }
