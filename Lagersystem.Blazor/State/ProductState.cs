@@ -1,4 +1,5 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
+using Lagersystem.Blazor.Models.Requests;
 using Lagersystem.Blazor.Services.Abstractions;
 
 namespace Lagersystem.Blazor.State;
@@ -35,7 +36,7 @@ public class ProductState
             {
                 result = result.Where(product =>
                     product.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    product.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+                    (product.Description ?? string.Empty).Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
             }
 
             if (SelectedSize.HasValue)
@@ -115,6 +116,70 @@ public class ProductState
         try
         {
             SelectedProduct = await _productService.GetProductByIdAsync(id);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task CreateProductAsync(CreateProductRequest request)
+    {
+        IsLoading = true;
+
+        try
+        {
+            // Opretter et nyt produkt via service-laget.
+            await _productService.CreateProductAsync(request);
+
+            // Opdaterer listen bagefter, så UI'et viser de nyeste data.
+            await LoadProductsAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task UpdateProductAsync(Guid id, UpdateProductRequest request)
+    {
+        IsLoading = true;
+
+        try
+        {
+            // Placeholder:
+            // Denne metode kalder service-laget, men service-metoden er
+            // endnu ikke fuldt implementeret, fordi request-modellen ikke
+            // matcher API'ets update-krav.
+            await _productService.UpdateProductAsync(id, request);
+
+            // Hvis update senere aktiveres rigtigt,
+            // genindlæser vi listen bagefter.
+            await LoadProductsAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task DeleteProductAsync(Guid id)
+    {
+        IsLoading = true;
+
+        try
+        {
+            // Sletter produktet via service-laget.
+            await _productService.DeleteProductAsync(id);
+
+            // Hvis det slettede produkt var valgt, nulstilles det.
+            if (SelectedProduct?.Id == id)
+            {
+                SelectedProduct = null;
+            }
+
+            // Opdaterer listen bagefter.
+            await LoadProductsAsync();
         }
         finally
         {
