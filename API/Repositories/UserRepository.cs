@@ -29,22 +29,23 @@ namespace API.Repositories
 
         public async Task<List<User>> GetAll()
         {
-            return await _dbContext.Users.ToListAsync();
+            return await _dbContext.Users.AsNoTracking().ToListAsync();
         }
 
         public async Task<User?> GetByEmail(string email)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
+            return await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email);
         }
 
         public async Task<User?> GetById(Guid id)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task Update(User user)
         {
-            _dbContext.Users.Update(user);
+            _dbContext.Users.Attach(user);
+            _dbContext.Entry(user).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
     }
