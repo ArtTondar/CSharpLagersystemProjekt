@@ -1,5 +1,6 @@
 ﻿using API.Models;
-using API.Repositories.DbAccess;
+using API.Repositories;
+using API.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -8,22 +9,35 @@ namespace API.Controllers
     [ApiController]
     public class ProductController : Controller
     {
-        private readonly IProductAccess _productAccess;
+        private readonly IProductRepository _repo;
 
-        public ProductController(ProductAccess productAccess) 
+        public ProductController(IProductRepository repo)
         {
-            _productAccess = productAccess;
+            _repo = repo;
+        }
+
+        private IActionResult OkOrNotFound<T>(List<T> list)
+        {
+            return (list == null || !list.Any()) ? NotFound() : Ok(list);
         }
 
         [HttpGet("get-product-by-id/{id}")]
         public async Task<IActionResult> GetProductById(Guid id)
         {
-            (Product product, Exception e) = await _productAccess.GetProductById(id);
-            if (product != null)
+            try
             {
+                Product? product = await _repo.GetProductById(id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
                 return Ok(product);
             }
-            return BadRequest();
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occured while retrieving product.");
+            }
+
         }
 
         [HttpGet]
@@ -31,16 +45,11 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProducts();
+                List<Product> products = await _repo.GetProducts();
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
@@ -51,16 +60,11 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProductsByName(name);
+                List<Product> products = await _repo.GetProductsByName(name);
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
@@ -71,16 +75,11 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProductsByDescription(description);
+                List<Product> products = await _repo.GetProductsByDescription(description);
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
@@ -91,16 +90,11 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProductsByUnitPrice(unitPrice);
+                List<Product> products = await _repo.GetProductsByUnitPrice(unitPrice);
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
@@ -111,16 +105,11 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProductsBySize(size);
+                List<Product> products = await _repo.GetProductsBySize(size);
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
@@ -131,16 +120,11 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProductsByWarehouse(warehouse);
+                List<Product> products = await _repo.GetProductsByWarehouse(warehouse);
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
@@ -151,16 +135,11 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProductsByUnitStock(unitStock);
+                List<Product> products = await _repo.GetProductsByUnitStock(unitStock);
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
@@ -172,23 +151,18 @@ namespace API.Controllers
         {
             try
             {
-                var products = await _productAccess.GetProductsByUnitStatus(unitStatus);
+                List<Product> products = await _repo.GetProductsByUnitStatus(unitStatus);
 
-                if (products == null || !products.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(products);
+                return OkOrNotFound(products);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(Product product)
+        public async Task<IActionResult> CreateProduct([FromBody] Product product)
         {
             if (!ModelState.IsValid)
             {
@@ -197,17 +171,17 @@ namespace API.Controllers
 
             try
             {
-                var createdProduct = await _productAccess.CreateProduct(product);
+                Product createdProduct = await _repo.CreateProduct(product);
                 return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "An error occured while creating product.");
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateProduct(Guid id, Product product)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] Product product)
         {
             if (!ModelState.IsValid)
             {
@@ -216,39 +190,43 @@ namespace API.Controllers
 
             if (id != product.Id)
             {
-                return BadRequest("ID mismatch");
+                return BadRequest();
+            }
+
+            var existingProduct = await _repo.GetProductById(id);
+            if (existingProduct == null)
+            {
+                return NotFound();
             }
 
             try
             {
-                var updated = await _productAccess.UpdateProduct(product);
-                if (!updated)
-                {
-                    return NotFound($"Product with ID {id} not found");
-                }
-                return Ok(product);
+                await _repo.UpdateProduct(product);
+                return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "An error occurred while updating product.");
             }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
+            var existingProduct = await _repo.GetProductById(id);
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
+
             try
             {
-                var deleted = await _productAccess.DeleteProduct(id);
-                if (!deleted)
-                {
-                    return NotFound($"Product with ID {id} not found");
-                }
+                await _repo.DeleteProduct(existingProduct);
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "An error occurred while deleting product.");
             }
         }
     }
