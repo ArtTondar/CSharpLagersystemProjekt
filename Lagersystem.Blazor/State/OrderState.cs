@@ -132,15 +132,18 @@ public class OrderState
 
         try
         {
-            // Placeholder:
-            // Delete på Order er endnu ikke sikker i backend.
+            // Sletter ordren via service-laget.
             await _orderService.DeleteOrderAsync(id);
 
+            // Hvis den slettede ordre var valgt i UI'et,
+            // nulstilles SelectedOrder bagefter.
             if (SelectedOrder?.Id == id)
             {
                 SelectedOrder = null;
             }
 
+            // Genindlæser listen efter sletning,
+            // så tabellen viser de nyeste data.
             await LoadOrdersAsync();
         }
         finally
