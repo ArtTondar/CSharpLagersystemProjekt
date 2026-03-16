@@ -81,30 +81,26 @@ public class OrderApiService : IOrderService
     public Task UpdateOrderAsync(Guid id, UpdateOrderRequest request)
     {
         // Placeholder:
-        // Denne metode er bevidst ikke aktiveret endnu.
+        // Denne metode er endnu ikke aktiveret.
         //
-        // Hvorfor:
-        // 1. API'et forventer en Order-model med Id i body.
-        // 2. UpdateOrderRequest har ikke Id lige nu.
-        // 3. API-routen i backend er også skrevet som "/{id}",
-        //    hvilket gør den usikker at ramme fra Blazor.
+        // API'et forventer en Order-model med Id i body,
+        // og update-requesten matcher endnu ikke det krav.
         //
-        // Derfor lader vi den stå som en tydelig placeholder,
-        // så projektet stadig bygger uden skjulte runtime-fejl.
+        // Derfor forbliver update slået fra,
+        // indtil request-modellen og API-modellen passer sammen.
 
         throw new NotImplementedException(
-            "UpdateOrderAsync er ikke aktiveret endnu, fordi Blazor-requesten ikke matcher API'et.");
+            "UpdateOrderAsync er ikke aktiveret endnu, fordi request-modellen ikke matcher API'et.");
     }
 
-    public Task DeleteOrderAsync(Guid id)
+    public async Task DeleteOrderAsync(Guid id)
     {
-        // Placeholder:
-        // Delete findes i API'et, men backend-routen er skrevet som "/{id}".
-        // Da vi ikke må ændre API'et, lader vi denne stå som placeholder indtil videre.
-        //
-        // Det er bedre end at aktivere noget, som måske fejler uforudsigeligt.
+        // Sletter en ordre ud fra id.
+        // Endpointet forventer id som route-parameter.
+        HttpResponseMessage response = await _httpClient.DeleteAsync($"api/Order/{id}");
 
-        throw new NotImplementedException(
-            "DeleteOrderAsync er ikke aktiveret endnu, fordi API-routen ikke er klar til sikker brug fra Blazor.");
+        // Sikrer at API-kaldet lykkedes.
+        // Hvis ikke, kastes en tydelig fejl.
+        await ApiResponseHandler.EnsureSuccessAsync(response);
     }
 }
