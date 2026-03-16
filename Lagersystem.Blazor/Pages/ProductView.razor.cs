@@ -6,66 +6,70 @@ namespace Lagersystem.Blazor.Pages;
 
 public partial class ProductView
 {
+    // ProductState bruges som mellemled mellem UI og service-lag.
+    // Komponenten skal kun bede state om data, ikke kalde API direkte.
     [Inject]
     public ProductState ProductState { get; set; } = default!;
 
-    public IReadOnlyList<ProductDto> Products => ProductState.FilteredProducts;
+    // Listen der vises i tabellen.
+    public IReadOnlyList<ProductDto> Products => ProductState.Products;
 
+    // Bruges til at vise loading-besked og deaktivere knapper under hentning.
     public bool IsLoading => ProductState.IsLoading;
 
-    public string SearchTerm
-    {
-        get => ProductState.SearchTerm;
-        set => ProductState.SearchTerm = value;
-    }
+    // Fejltekst hvis API-kald fejler.
+    public string ErrorMessage { get; set; } = string.Empty;
 
-    public int? SelectedSize
-    {
-        get => ProductState.SelectedSize;
-        set => ProductState.SelectedSize = value;
-    }
+    // Bruges til at styre visning af fejlbeskeden.
+    public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
 
-    public string SelectedWarehouse
-    {
-        get => ProductState.SelectedWarehouse;
-        set => ProductState.SelectedWarehouse = value;
-    }
+    // Viser tom-besked når der ikke hentes data, og listen er tom.
+    public bool ShowEmptyMessage => !IsLoading && Products.Count == 0;
 
-    public UnitStatus? SelectedUnitStatus
-    {
-        get => ProductState.SelectedUnitStatus;
-        set => ProductState.SelectedUnitStatus = value;
-    }
-
-    public string SortField
-    {
-        get => ProductState.SortField;
-        set => ProductState.SortField = value;
-    }
-
-    public bool SortDescending
-    {
-        get => ProductState.SortDescending;
-        set => ProductState.SortDescending = value;
-    }
-
+    // Når siden åbner første gang, hentes alle produkter via GET /api/Product.
     protected override async Task OnInitializedAsync()
     {
-        await ProductState.LoadProductsAsync();
+        await LoadProductsAsync();
     }
 
-    private void ClearFilters()
+    // Kaldes fra knappen "Genindlæs produkter".
+    public async Task ReloadProductsAsync()
     {
-        ProductState.ClearAllFilters();
+        await LoadProductsAsync();
     }
 
-    private void SelectProduct(ProductDto product)
+    // Samler logikken til at hente alle produkter ét sted.
+    private async Task LoadProductsAsync()
+    {
+        ClearError();
+
+        try
+        {
+            // Denne metode skal kalde GET /api/Product i service-laget.
+            await ProductState.LoadProductsAsync();
+        }
+        catch (Exception ex)
+        {
+            SetError($"Fejl ved hentning af produkter: {ex.Message}");
+        }
+    }
+
+    // Gemmer valgt produkt i state.
+    // Kan senere bruges til edit, details eller navigation.
+    public void SelectProduct(ProductDto product)
     {
         ProductState.SelectProduct(product);
     }
 
-    private void ToggleSortDirection()
+    // Nulstiller tidligere fejl før et nyt API-kald.
+    private void ClearError()
     {
-        SortDescending = !SortDescending;
+        ErrorMessage = string.Empty;
+    }
+
+    // Sætter fejlbesked hvis noget går galt.
+    private void SetError(string message)
+    {
+        ErrorMessage = message;
     }
 }

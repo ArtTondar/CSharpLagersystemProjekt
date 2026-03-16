@@ -13,100 +13,89 @@ public class ProductState
 
     public bool IsLoading { get; private set; }
 
-    public string SearchTerm { get; set; } = string.Empty;
-
-    public int? SelectedSize { get; set; }
-
-    public string SelectedWarehouse { get; set; } = string.Empty;
-
-    public UnitStatus? SelectedUnitStatus { get; set; }
-
-    public string SortField { get; set; } = "Name";
-
-    public bool SortDescending { get; set; }
-
-    public IReadOnlyList<ProductDto> FilteredProducts
-    {
-        get
-        {
-            IEnumerable<ProductDto> result = Products;
-
-            if (!string.IsNullOrWhiteSpace(SearchTerm))
-            {
-                result = result.Where(product =>
-                    product.Name.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    product.Description.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (SelectedSize.HasValue)
-            {
-                result = result.Where(product => product.Size == SelectedSize.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(SelectedWarehouse))
-            {
-                result = result.Where(product =>
-                    product.Warehouse.Contains(SelectedWarehouse, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (SelectedUnitStatus.HasValue)
-            {
-                result = result.Where(product => product.UnitStatus == SelectedUnitStatus.Value);
-            }
-
-            result = SortField switch
-            {
-                "Description" => SortDescending
-                    ? result.OrderByDescending(product => product.Description)
-                    : result.OrderBy(product => product.Description),
-
-                "UnitPrice" => SortDescending
-                    ? result.OrderByDescending(product => product.UnitPrice)
-                    : result.OrderBy(product => product.UnitPrice),
-
-                "Size" => SortDescending
-                    ? result.OrderByDescending(product => product.Size)
-                    : result.OrderBy(product => product.Size),
-
-                "Warehouse" => SortDescending
-                    ? result.OrderByDescending(product => product.Warehouse)
-                    : result.OrderBy(product => product.Warehouse),
-
-                "UnitStock" => SortDescending
-                    ? result.OrderByDescending(product => product.UnitStock)
-                    : result.OrderBy(product => product.UnitStock),
-
-                "UnitStatus" => SortDescending
-                    ? result.OrderByDescending(product => product.UnitStatus)
-                    : result.OrderBy(product => product.UnitStatus),
-
-                _ => SortDescending
-                    ? result.OrderByDescending(product => product.Name)
-                    : result.OrderBy(product => product.Name)
-            };
-
-            return result.ToList();
-        }
-    }
-
     public ProductState(IProductService productService)
     {
         _productService = productService;
     }
 
-    public async Task LoadProductsAsync()
+    // --------------------------------------------------------
+    // CENTRAL LOADER
+    // --------------------------------------------------------
+    // Samler loading logik ét sted
+    // så vi undgår gentaget kode i alle metoder
+    private async Task ExecuteProductLoad(
+        Func<Task<IReadOnlyList<ProductDto>>> loader)
     {
         IsLoading = true;
 
         try
         {
-            Products = await _productService.GetProductsAsync();
+            Products = await loader();
         }
         finally
         {
             IsLoading = false;
         }
     }
+
+    // --------------------------------------------------------
+    // GET ALL
+    // --------------------------------------------------------
+    public async Task LoadProductsAsync()
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsAsync());
+    }
+
+    // --------------------------------------------------------
+    // SEARCH METHODS
+    // --------------------------------------------------------
+
+    public async Task LoadProductsByNameAsync(string name)
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsByNameAsync(name));
+    }
+
+    public async Task LoadProductsByDescriptionAsync(string description)
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsByDescriptionAsync(description));
+    }
+
+    public async Task LoadProductsBySizeAsync(int size)
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsBySizeAsync(size));
+    }
+
+    public async Task LoadProductsByWarehouseAsync(string warehouse)
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsByWarehouseAsync(warehouse));
+    }
+
+    public async Task LoadProductsByUnitPriceAsync(decimal price)
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsByUnitPriceAsync(price));
+    }
+
+    public async Task LoadProductsByUnitStockAsync(int stock)
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsByUnitStockAsync(stock));
+    }
+
+    public async Task LoadProductsByUnitStatusAsync(int status)
+    {
+        await ExecuteProductLoad(() =>
+            _productService.GetProductsByUnitStatusAsync(status));
+    }
+
+    // --------------------------------------------------------
+    // SINGLE PRODUCT
+    // --------------------------------------------------------
 
     public async Task LoadProductByIdAsync(Guid id)
     {
@@ -125,15 +114,5 @@ public class ProductState
     public void SelectProduct(ProductDto product)
     {
         SelectedProduct = product;
-    }
-
-    public void ClearAllFilters()
-    {
-        SearchTerm = string.Empty;
-        SelectedSize = null;
-        SelectedWarehouse = string.Empty;
-        SelectedUnitStatus = null;
-        SortField = "Name";
-        SortDescending = false;
     }
 }

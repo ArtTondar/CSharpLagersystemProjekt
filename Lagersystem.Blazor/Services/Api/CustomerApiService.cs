@@ -1,24 +1,33 @@
-﻿using Lagersystem.Blazor.Models.Dtos;
+﻿using Lagersystem.Blazor.API.Clients;
+using Lagersystem.Blazor.Models.Dtos;
 using Lagersystem.Blazor.Services.Abstractions;
 
 namespace Lagersystem.Blazor.Services.Api;
 
 public class CustomerApiService : ICustomerService
 {
-    private readonly HttpClient _httpClient;
+    private readonly ApiClient _apiClient;
 
-    public CustomerApiService(HttpClient httpClient)
+    public CustomerApiService(ApiClient apiClient)
     {
-        _httpClient = httpClient;
+        _apiClient = apiClient;
     }
 
-    public Task<IReadOnlyList<CustomerDto>> GetCustomersAsync()
+    public async Task<IReadOnlyList<CustomerDto>> GetCustomersAsync()
     {
-        throw new NotImplementedException();
+        // Placeholder til at hente alle kunder.
+        // Aktivér denne når Customer endpointet findes i API'et.
+        // Hvis endpoint-navnet bliver anderledes, skal URL'en rettes her.
+
+        return await _apiClient.GetAsync<List<CustomerDto>>("api/Customer")
+               ?? new List<CustomerDto>();
     }
 
-    public Task<CustomerDto?> GetCustomerByIdAsync(Guid id)
+    public async Task<CustomerDto?> GetCustomerByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        // Placeholder til at hente én kunde ud fra id.
+        // Denne metode er nyttig, hvis man senere vil have en kundedetaljeside.
+
+        return await _apiClient.GetAsync<CustomerDto>($"api/Customer/{id}");
     }
 }
