@@ -58,7 +58,7 @@ namespace API.Repositories
 
         public async Task<List<Order>> GetByCustomerId(Guid customerId)
         {
-            return await _dbContext.Orders.Where(o => o.CustomerId == customerId).ToListAsync();
+            return await _dbContext.Orders.Where(o => o.CustomerId == customerId).AsNoTracking().ToListAsync();
         }
 
         public async Task Update(Order order)
