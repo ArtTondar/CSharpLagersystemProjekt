@@ -15,17 +15,18 @@ namespace API.Repositories
     
         public async Task<Product?> GetProductById(Guid Id)
         {
-            return await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == Id);
+            return await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == Id);
         }
 
         public async Task<List<Product>> GetProducts()
         {
-            return await _dbContext.Products.ToListAsync();
+            return await _dbContext.Products.AsNoTracking().ToListAsync();
         }
 
         public async Task UpdateProduct(Product product)
         {
-            _dbContext.Products.Update(product);
+            _dbContext.Products.Attach(product);
+            _dbContext.Entry(product).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
 
@@ -38,34 +39,34 @@ namespace API.Repositories
 
         public async Task<List<Product>> GetProductsByName(string name)
         {
-            return await _dbContext.Products.Where(p=> p.Name.Contains(name)).ToListAsync();
+            return await _dbContext.Products.Where(p=> p.Name.Contains(name)).AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Product>> GetProductsByDescription(string description)
         {
-            return await _dbContext.Products.Where(p => p.Description.Contains(description)).ToListAsync();
+            return await _dbContext.Products.Where(p => p.Description.Contains(description)).AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Product>> GetProductsByUnitPrice(decimal unitPrice)
         {
-            return await _dbContext.Products.Where(p=> p.UnitPrice == unitPrice).ToListAsync();             
+            return await _dbContext.Products.Where(p=> p.UnitPrice == unitPrice).AsNoTracking().ToListAsync();             
         }
 
 
         public async Task<List<Product>> GetProductsBySize(int size)
         {
-            return await _dbContext.Products.Where(p => p.Size == size).ToListAsync();
+            return await _dbContext.Products.Where(p => p.Size == size).AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Product>> GetProductsByWarehouse(string warehouse)
 
         {
-            return await _dbContext.Products.Where(p => p.Warehouse == warehouse).ToListAsync();
+            return await _dbContext.Products.Where(p => p.Warehouse == warehouse).AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Product>> GetProductsByUnitStatus(UnitStatus unitStatus)
         {
-            return await _dbContext.Products.Where(p => p.UnitStatus == unitStatus).ToListAsync();
+            return await _dbContext.Products.Where(p => p.UnitStatus == unitStatus).AsNoTracking().ToListAsync();
         }
 
         public async Task<Product> CreateProduct(Product product)
@@ -79,7 +80,7 @@ namespace API.Repositories
 
         public async Task<List<Product>> GetProductsByUnitStock(int unitStock)
         {
-            return await _dbContext.Products.Where(p => p.UnitStock == unitStock).ToListAsync();
+            return await _dbContext.Products.Where(p => p.UnitStock == unitStock).AsNoTracking().ToListAsync();
         }
 
     }
