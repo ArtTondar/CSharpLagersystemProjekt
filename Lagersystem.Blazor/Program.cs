@@ -8,11 +8,10 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 
-// TODO:
-// Skift base address til den adresse hvor API faktisk kører.
-// Eksempel:
-//     BaseAddress = new Uri("https://localhost:5242/")
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped(_ => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:7289/")
+});
 
 builder.Services.AddApplicationServices();
 await builder.Build().RunAsync();

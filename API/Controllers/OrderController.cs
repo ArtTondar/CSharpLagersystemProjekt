@@ -112,7 +112,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(Guid id, Order order)
         {
             if (!ModelState.IsValid)
@@ -142,7 +142,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
             Order? existingOrder = await _repo.GetById(id);
