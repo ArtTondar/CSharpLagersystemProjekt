@@ -1,4 +1,5 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
+using Lagersystem.Blazor.Models.Requests;
 using Lagersystem.Blazor.Services.Abstractions;
 
 namespace Lagersystem.Blazor.State;
@@ -8,21 +9,14 @@ public class ProductState
     private readonly IProductService _productService;
 
     public IReadOnlyList<ProductDto> Products { get; private set; } = new List<ProductDto>();
-
     public ProductDto? SelectedProduct { get; private set; }
-
     public bool IsLoading { get; private set; }
 
     public string SearchTerm { get; set; } = string.Empty;
-
     public int? SelectedSize { get; set; }
-
     public string SelectedWarehouse { get; set; } = string.Empty;
-
     public UnitStatus? SelectedUnitStatus { get; set; }
-
     public string SortField { get; set; } = "Name";
-
     public bool SortDescending { get; set; }
 
     public IReadOnlyList<ProductDto> FilteredProducts
@@ -56,33 +50,13 @@ public class ProductState
 
             result = SortField switch
             {
-                "Description" => SortDescending
-                    ? result.OrderByDescending(product => product.Description)
-                    : result.OrderBy(product => product.Description),
-
-                "UnitPrice" => SortDescending
-                    ? result.OrderByDescending(product => product.UnitPrice)
-                    : result.OrderBy(product => product.UnitPrice),
-
-                "Size" => SortDescending
-                    ? result.OrderByDescending(product => product.Size)
-                    : result.OrderBy(product => product.Size),
-
-                "Warehouse" => SortDescending
-                    ? result.OrderByDescending(product => product.Warehouse)
-                    : result.OrderBy(product => product.Warehouse),
-
-                "UnitStock" => SortDescending
-                    ? result.OrderByDescending(product => product.UnitStock)
-                    : result.OrderBy(product => product.UnitStock),
-
-                "UnitStatus" => SortDescending
-                    ? result.OrderByDescending(product => product.UnitStatus)
-                    : result.OrderBy(product => product.UnitStatus),
-
-                _ => SortDescending
-                    ? result.OrderByDescending(product => product.Name)
-                    : result.OrderBy(product => product.Name)
+                "Description" => SortDescending ? result.OrderByDescending(p => p.Description) : result.OrderBy(p => p.Description),
+                "UnitPrice" => SortDescending ? result.OrderByDescending(p => p.UnitPrice) : result.OrderBy(p => p.UnitPrice),
+                "Size" => SortDescending ? result.OrderByDescending(p => p.Size) : result.OrderBy(p => p.Size),
+                "Warehouse" => SortDescending ? result.OrderByDescending(p => p.Warehouse) : result.OrderBy(p => p.Warehouse),
+                "UnitStock" => SortDescending ? result.OrderByDescending(p => p.UnitStock) : result.OrderBy(p => p.UnitStock),
+                "UnitStatus" => SortDescending ? result.OrderByDescending(p => p.UnitStatus) : result.OrderBy(p => p.UnitStatus),
+                _ => SortDescending ? result.OrderByDescending(p => p.Name) : result.OrderBy(p => p.Name)
             };
 
             return result.ToList();
@@ -108,6 +82,26 @@ public class ProductState
         }
     }
 
+    public async Task CreateProductAsync(CreateProductRequest request)
+    {
+        await _productService.CreateProductAsync(request);
+        await LoadProductsAsync();
+    }
+
+    public async Task UpdateProductAsync(Guid id, UpdateProductRequest request)
+    {
+        await _productService.UpdateProductAsync(id, request);
+        await LoadProductsAsync();
+        await LoadProductByIdAsync(id);
+    }
+
+    public async Task DeleteProductAsync(Guid id)
+    {
+        await _productService.DeleteProductAsync(id);
+        SelectedProduct = null;
+        await LoadProductsAsync();
+    }
+
     public async Task LoadProductByIdAsync(Guid id)
     {
         IsLoading = true;
@@ -125,6 +119,11 @@ public class ProductState
     public void SelectProduct(ProductDto product)
     {
         SelectedProduct = product;
+    }
+
+    public void ClearSelectedProduct()
+    {
+        SelectedProduct = null;
     }
 
     public void ClearAllFilters()

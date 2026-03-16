@@ -17,7 +17,10 @@ public class OrderApiService : IOrderService
     {
         throw new NotImplementedException();
     }
-
+    public Task<OrderDetailsDto?> GetOrderDetailsByIdAsync(Guid id)
+    {
+        throw new NotImplementedException();
+    }
     public Task<OrderDto?> GetOrderByIdAsync(Guid id)
     {
         throw new NotImplementedException();
