@@ -23,7 +23,7 @@ public interface IProductService
 
     Task<IReadOnlyList<ProductDto>> GetProductsByUnitStatusAsync(int unitStatus);
 
-    Task CreateProductAsync(CreateProductRequest request);
+    Task<ProductDto> CreateProductAsync(CreateProductRequest request);
 
     Task UpdateProductAsync(Guid id, UpdateProductRequest request);
 

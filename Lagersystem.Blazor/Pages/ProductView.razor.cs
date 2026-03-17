@@ -77,6 +77,21 @@ public partial class ProductView
         NavigationManager.NavigateTo($"/products/{productId}");
     }
 
+
+    // Gemmer valgt produkt i state.
+    // Kan stadig beholdes midlertidigt, hvis anden eksisterende kode bruger den.
+    public void SelectProduct(ProductDto product)
+    {
+        ProductState.SelectProduct(product);
+    }
+
+    // Navigerer til siden for oprettelse af et nyt produkt.
+    public void OpenCreateProductPage()
+    {
+        // Navigerer til siden for oprettelse af et nyt produkt.
+        NavigationManager.NavigateTo("/products/create");
+    }
+
     // Sletter et produkt via state-laget
     // og opdaterer tabellen uden genindlæsning.
     public async Task DeleteProductAsync(Guid productId)
@@ -104,13 +119,6 @@ public partial class ProductView
             SetError($"Fejl ved sletning af produkt: {ex.Message}");
         }
     }
-    // Gemmer valgt produkt i state.
-    // Kan stadig beholdes midlertidigt, hvis anden eksisterende kode bruger den.
-    public void SelectProduct(ProductDto product)
-    {
-        ProductState.SelectProduct(product);
-    }
-
     // Nulstiller tidligere fejl før et nyt API-kald.
     private void ClearError()
     {
