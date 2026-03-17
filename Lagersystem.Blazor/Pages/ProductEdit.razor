@@ -1,0 +1,73 @@
+﻿@page "/products/{Id:guid}"
+
+<PageTitle>Rediger produkt</PageTitle>
+
+<h3>Rediger produkt</h3>
+
+@if (IsLoading)
+{
+    <p>Indlæser produkt...</p>
+}
+else if (HasError)
+{
+    <p>@ErrorMessage</p>
+}
+else if (EditRequest is null)
+{
+    <p>Produktet blev ikke fundet.</p>
+}
+else
+{
+    <EditForm Model="EditRequest" OnValidSubmit="SaveAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Navn</label>
+            <InputText id="name" class="form-control" @bind-Value="EditRequest.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Beskrivelse</label>
+            <InputText id="description" class="form-control" @bind-Value="EditRequest.Description" />
+        </div>
+
+        <div class="mb-3">
+            <label for="unitPrice" class="form-label">Pris</label>
+            <InputNumber id="unitPrice" class="form-control" @bind-Value="EditRequest.UnitPrice" />
+        </div>
+
+        <div class="mb-3">
+            <label for="size" class="form-label">Størrelse</label>
+            <InputNumber id="size" class="form-control" @bind-Value="EditRequest.Size" />
+        </div>
+
+        <div class="mb-3">
+            <label for="warehouse" class="form-label">Lager</label>
+            <InputText id="warehouse" class="form-control" @bind-Value="EditRequest.Warehouse" />
+        </div>
+
+        <div class="mb-3">
+            <label for="unitStock" class="form-label">Antal på lager</label>
+            <InputNumber id="unitStock" class="form-control" @bind-Value="EditRequest.UnitStock" />
+        </div>
+
+        <div class="mb-3">
+            <label for="unitStatus" class="form-label">Status</label>
+            <InputSelect id="unitStatus" class="form-select" @bind-Value="EditRequest.UnitStatus">
+                @foreach (var status in UnitStatuses)
+                {
+                    <option value="@status">@status</option>
+                }
+            </InputSelect>
+        </div>
+
+        <button type="submit" class="btn btn-primary me-2" disabled="@IsSaving">
+            @(IsSaving ? "Gemmer..." : "Gem")
+        </button>
+
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">
+            Annuller
+        </button>
+    </EditForm>
+}

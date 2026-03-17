@@ -25,9 +25,21 @@ public class ProductApiService : IProductService
 
     public async Task<ProductDto?> GetProductByIdAsync(Guid id)
     {
-        // Henter ét produkt ud fra id.
+        // Henter et enkelt produkt fra API'et via det route-navn,
+        // som controlleren faktisk eksponerer.
+        HttpResponseMessage response = await _httpClient.GetAsync(
+            $"api/Product/get-product-by-id/{id}");
+
         // Returnerer null hvis produktet ikke findes.
-        return await _httpClient.GetFromJsonAsync<ProductDto>($"api/Product/get-product-by-id/{id}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        // Validerer at kaldet lykkedes.
+        await ApiResponseHandler.EnsureSuccessAsync(response);
+
+        return await response.Content.ReadFromJsonAsync<ProductDto>();
     }
 
     public async Task<IReadOnlyList<ProductDto>> GetProductsByNameAsync(string name)
