@@ -1,4 +1,6 @@
 ﻿@page "/orders/create"
+@using Lagersystem.Blazor.Models.Requests
+@using Lagersystem.Blazor.Models.Dtos
 
 <PageTitle>Opret ordre</PageTitle>
 
@@ -21,17 +23,83 @@ else
         <ValidationSummary />
 
         <div class="mb-3">
-            <label for="customerId" class="form-label">Customer Id</label>
-            <InputText id="customerId"
-                       class="form-control"
-                       @bind-Value="CustomerIdText" />
+            <label class="form-label">Kunde</label>
+            <InputSelect class="form-select" @bind-Value="CreateRequest.CustomerId">
+                <option value="@Guid.Empty">Vælg en kunde</option>
+
+                @foreach (CustomerDto customer in Customers)
+                {
+                    <option value="@customer.Id">
+                        @customer.Name
+                    </option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ordrelinjer</label>
+
+            @if (CreateRequest.OrderDetails.Count == 0)
+            {
+                <p class="text-muted">Ingen produkter tilføjet endnu.</p>
+            }
+            else
+            {
+                @foreach (CreateOrderDetailRequest detail in CreateRequest.OrderDetails)
+                {
+                    <div class="card p-3 mb-3">
+                        <div class="mb-3">
+                            <label class="form-label">Produkt</label>
+                            <InputSelect class="form-select"
+                                         @bind-Value="detail.ProductId"
+                                         @bind-Value:after="() => OnProductChanged(detail)">
+                                <option value="@Guid.Empty">Vælg et produkt</option>
+
+                                @foreach (ProductDto product in Products)
+                                {
+                                    <option value="@product.Id">
+                                        @product.Name
+                                    </option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Antal</label>
+                            <InputNumber class="form-control"
+                                         @bind-Value="detail.Quantity"
+                                         @bind-Value:after="OnQuantityChanged" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Enhedspris</label>
+                            <InputNumber class="form-control"
+                                         @bind-Value="detail.UnitPrice"
+                                         readonly />
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-outline-danger"
+                                @onclick="() => RemoveOrderDetail(detail)">
+                            Fjern linje
+                        </button>
+                    </div>
+                }
+            }
+
+            <button type="button"
+                    class="btn btn-outline-primary"
+                    @onclick="AddOrderDetail">
+                Tilføj produktlinje
+            </button>
         </div>
 
         <div class="mb-3">
             <label for="totalPrice" class="form-label">Totalpris</label>
             <InputNumber id="totalPrice"
                          class="form-control"
-                         @bind-Value="CreateRequest.TotalPrice" />
+                         @bind-Value="CreateRequest.TotalPrice"
+                         readonly />
         </div>
 
         <button type="submit"

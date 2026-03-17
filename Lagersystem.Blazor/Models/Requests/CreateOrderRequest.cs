@@ -11,7 +11,6 @@ public class CreateOrderRequest
 
     public decimal TotalPrice { get; set; }
 
-    // OrderDetails sendes som tom liste i første version,
-    // så oprettelse kan fungere uden detail-logik endnu.
+    // Indeholder alle ordrelinjer, som skal gemmes sammen med ordren.
     public List<CreateOrderDetailRequest> OrderDetails { get; set; } = new();
 }
