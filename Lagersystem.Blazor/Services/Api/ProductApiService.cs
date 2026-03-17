@@ -103,13 +103,23 @@ public class ProductApiService : IProductService
                ?? new List<ProductDto>();
     }
 
-    public async Task CreateProductAsync(CreateProductRequest request)
+    public async Task<ProductDto> CreateProductAsync(CreateProductRequest request)
     {
-        // Opretter et nyt produkt via POST.
+        // Opretter et nyt produkt via API'et.
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/Product", request);
 
-        // Tjekker om API'et accepterede requestet.
+        // Sikrer at API-kaldet lykkedes.
         await ApiResponseHandler.EnsureSuccessAsync(response);
+
+        ProductDto? createdProduct = await response.Content.ReadFromJsonAsync<ProductDto>();
+
+        // Stopper hvis API'et ikke returnerede et produkt som forventet.
+        if (createdProduct is null)
+        {
+            throw new InvalidOperationException("API'et returnerede ikke et oprettet produkt.");
+        }
+
+        return createdProduct;
     }
     public async Task UpdateProductAsync(Guid id, UpdateProductRequest request)
     {
