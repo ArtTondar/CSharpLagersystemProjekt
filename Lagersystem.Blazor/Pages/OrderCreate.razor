@@ -1,0 +1,49 @@
+﻿@page "/orders/create"
+
+<PageTitle>Opret ordre</PageTitle>
+
+<h3>Opret ordre</h3>
+
+@if (HasError)
+{
+    <div class="alert alert-danger mt-3">
+        @ErrorMessage
+    </div>
+}
+else if (CreateRequest is null)
+{
+    <p>Kunne ikke initialisere formularen.</p>
+}
+else
+{
+    <EditForm Model="CreateRequest" OnValidSubmit="CreateAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="customerId" class="form-label">Customer Id</label>
+            <InputText id="customerId"
+                       class="form-control"
+                       @bind-Value="CustomerIdText" />
+        </div>
+
+        <div class="mb-3">
+            <label for="totalPrice" class="form-label">Totalpris</label>
+            <InputNumber id="totalPrice"
+                         class="form-control"
+                         @bind-Value="CreateRequest.TotalPrice" />
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary me-2"
+                disabled="@IsSaving">
+            @(IsSaving ? "Opretter..." : "Opret")
+        </button>
+
+        <button type="button"
+                class="btn btn-secondary"
+                @onclick="Cancel">
+            Annuller
+        </button>
+    </EditForm>
+}

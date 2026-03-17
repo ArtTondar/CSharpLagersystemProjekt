@@ -89,17 +89,26 @@ public class OrderState
         }
     }
 
-    public async Task CreateOrderAsync(CreateOrderRequest request)
+    public async Task<OrderDto> CreateOrderAsync(CreateOrderRequest request)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         IsLoading = true;
 
         try
         {
-            // Opretter en ny ordre via service-laget.
-            await _orderService.CreateOrderAsync(request);
+            // Kalder service-laget, som sender POST-request til API'et.
+            OrderDto createdOrder = await _orderService.CreateOrderAsync(request);
 
-            // Genindlæser listen bagefter.
-            await LoadOrdersAsync();
+            // Lægger den nye ordre ind i den lokale state,
+            // så listen opdateres uden fuld genindlæsning.
+            List<OrderDto> updatedOrders = Orders.ToList();
+            updatedOrders.Add(createdOrder);
+
+            Orders = updatedOrders;
+            SelectedOrder = createdOrder;
+
+            return createdOrder;
         }
         finally
         {
