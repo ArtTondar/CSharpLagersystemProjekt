@@ -1,7 +1,7 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
+using Lagersystem.Blazor.Models.Requests;
 using Lagersystem.Blazor.State;
 using Microsoft.AspNetCore.Components;
-using Lagersystem.Blazor.Models.Requests;
 
 namespace Lagersystem.Blazor.Pages;
 
@@ -12,6 +12,11 @@ public partial class OrderView
     [Inject]
     public OrderState OrderState { get; set; } = default!;
 
+    // CustomerState bruges til at hente kunder,
+    // så ordrelisten kan vise kundenavne i stedet for rå id'er.
+    [Inject]
+    public CustomerState CustomerState { get; set; } = default!;
+
     // NavigationManager bruges til at navigere til andre sider,
     // fx siden for oprettelse af en ny ordre.
     [Inject]
@@ -20,11 +25,14 @@ public partial class OrderView
     // Listen der vises i tabellen.
     public IReadOnlyList<OrderDto> Orders => OrderState.Orders;
 
-    // Den valgte ordre bruges til at vise detaljer under tabellen.
+    // Bruges til opslag af kundenavne ud fra CustomerId.
+    public IReadOnlyList<CustomerDto> Customers => CustomerState.Customers;
+
+    // Den valgte ordre bruges til at vise detaljer over tabellen.
     public OrderDto? SelectedOrder => OrderState.SelectedOrder;
 
-    // Bruges til loading-besked og til at deaktivere knappen under hentning.
-    public bool IsLoading => OrderState.IsLoading;
+    // Bruges til loading-besked og til at deaktivere knapper under hentning.
+    public bool IsLoading => OrderState.IsLoading || CustomerState.IsLoading;
 
     // Fejltekst hvis API-kald fejler.
     public string ErrorMessage { get; set; } = string.Empty;
@@ -35,32 +43,32 @@ public partial class OrderView
     // Viser tom-besked når listen er tom og der ikke længere hentes data.
     public bool ShowEmptyMessage => !IsLoading && Orders.Count == 0;
 
-    // Når siden åbner første gang, hentes alle ordrer via GET /api/Order.
+    // Når siden åbner første gang, hentes både ordrer og kunder.
     protected override async Task OnInitializedAsync()
     {
-        await LoadOrdersAsync();
+        await LoadPageDataAsync();
     }
 
     // Kaldes fra knappen "Genindlæs ordrer".
     public async Task ReloadOrdersAsync()
     {
-        await LoadOrdersAsync();
+        await LoadPageDataAsync();
     }
 
-    // Samler logikken til at hente alle ordrer ét sted.
-    private async Task LoadOrdersAsync()
+    // Henter både ordrer og kunder,
+    // så tabellen kan vise læsbare kundenavne.
+    private async Task LoadPageDataAsync()
     {
         ClearError();
 
         try
         {
-            // Kalder state-laget, som derefter kalder service-laget
-            // og til sidst GET /api/Order.
             await OrderState.LoadOrdersAsync();
+            await CustomerState.LoadCustomersAsync();
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved hentning af ordrer: {ex.Message}");
+            SetError($"Fejl ved hentning af data: {ex.Message}");
         }
     }
 
@@ -130,6 +138,15 @@ public partial class OrderView
         {
             SetError($"Fejl ved sletning af ordre: {ex.Message}");
         }
+    }
+
+    // Finder kundenavn ud fra customer-id.
+    // Returnerer id som tekst hvis kunden ikke findes i den hentede liste.
+    public string GetCustomerDisplayName(Guid customerId)
+    {
+        CustomerDto? customer = Customers.FirstOrDefault(c => c.Id == customerId);
+
+        return customer?.Name ?? customerId.ToString();
     }
 
     // Nulstiller tidligere fejl før et nyt API-kald.
