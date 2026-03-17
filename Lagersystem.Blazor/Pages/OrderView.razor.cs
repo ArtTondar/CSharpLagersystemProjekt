@@ -12,6 +12,11 @@ public partial class OrderView
     [Inject]
     public OrderState OrderState { get; set; } = default!;
 
+    // NavigationManager bruges til at navigere til andre sider,
+    // fx siden for oprettelse af en ny ordre.
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
     // Listen der vises i tabellen.
     public IReadOnlyList<OrderDto> Orders => OrderState.Orders;
 
@@ -57,6 +62,12 @@ public partial class OrderView
         {
             SetError($"Fejl ved hentning af ordrer: {ex.Message}");
         }
+    }
+
+    public void OpenCreateOrderPage()
+    {
+        // Navigerer til siden for oprettelse af en ny ordre.
+        NavigationManager.NavigateTo("/orders/create");
     }
 
     // Henter den konkrete ordre igen ud fra dens id.
