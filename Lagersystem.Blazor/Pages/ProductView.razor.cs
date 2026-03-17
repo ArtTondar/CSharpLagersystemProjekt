@@ -11,6 +11,11 @@ public partial class ProductView
     [Inject]
     public ProductState ProductState { get; set; } = default!;
 
+    // NavigationManager bruges til at skifte til redigeringssiden
+    // for det valgte produkt.
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
     // Listen der vises i tabellen.
     public IReadOnlyList<ProductDto> Products => ProductState.Products;
 
@@ -54,8 +59,15 @@ public partial class ProductView
         }
     }
 
+    // Navigerer til en separat side for det valgte produkt,
+    // hvor redigering og gemning håndteres.
+    public void OpenProduct(Guid productId)
+    {
+        NavigationManager.NavigateTo($"/products/{productId}");
+    }
+
     // Gemmer valgt produkt i state.
-    // Kan senere bruges til edit, details eller navigation.
+    // Kan stadig beholdes midlertidigt, hvis anden eksisterende kode bruger den.
     public void SelectProduct(ProductDto product)
     {
         ProductState.SelectProduct(product);

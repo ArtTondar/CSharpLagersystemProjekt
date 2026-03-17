@@ -103,6 +103,8 @@ public class ProductState
 
         try
         {
+            // Henter et enkelt produkt fra service-laget
+            // og gemmer det som valgt produkt i state.
             SelectedProduct = await _productService.GetProductByIdAsync(id);
         }
         finally
@@ -111,7 +113,6 @@ public class ProductState
         }
     }
 
-    
     public void SelectProduct(ProductDto product)
     {
         SelectedProduct = product;
@@ -122,7 +123,7 @@ public class ProductState
     // --------------------------------------------------------
     public async Task UpdateProductAsync(Guid id, UpdateProductRequest request)
     {
-        // Guard clauses:
+        // Guard clause:
         // Request må ikke være null.
         ArgumentNullException.ThrowIfNull(request);
 
@@ -157,9 +158,8 @@ public class ProductState
             if (index >= 0)
             {
                 updatedProducts[index] = updatedProduct;
+                Products = updatedProducts;
             }
-
-            Products = updatedProducts;
 
             // Hvis det valgte produkt er det samme som det opdaterede,
             // opdateres SelectedProduct også.

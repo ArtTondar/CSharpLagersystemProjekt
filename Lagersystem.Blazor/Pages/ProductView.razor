@@ -1,4 +1,4 @@
-﻿@page "/product"
+﻿@page "/products"
 @using Lagersystem.Blazor.Models.Dtos
 
 <PageTitle>Product</PageTitle>
@@ -63,10 +63,7 @@
                             <td>@product.UnitStock</td>
                             <td>@product.UnitStatus</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary"
-                                        @onclick="() => SelectProduct(product)">
-                                    Vælg
-                                </button>
+                                <button @onclick="() => OpenProduct(product.Id)">Vælg</button>
                             </td>
                         </tr>
                     }
