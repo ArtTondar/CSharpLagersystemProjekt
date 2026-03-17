@@ -11,14 +11,16 @@ public partial class OrderCreate
     public OrderState OrderState { get; set; } = default!;
 
     [Inject]
+    public ProductState ProductState { get; set; } = default!;
+
+    [Inject]
+    public CustomerState CustomerState { get; set; } = default!;
+
+    [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
     // Request-model der bindes til formularen.
     public CreateOrderRequest? CreateRequest { get; set; }
-
-    // CustomerId bindes som tekst, så input kan valideres sikkert
-    // før det konverteres til Guid.
-    public string CustomerIdText { get; set; } = string.Empty;
 
     // Fejltekst som vises hvis oprettelsen fejler.
     public string ErrorMessage { get; set; } = string.Empty;
@@ -29,10 +31,14 @@ public partial class OrderCreate
     // Gør markup mere læsbar.
     public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
 
-    protected override void OnInitialized()
+    // Produkter bruges i dropdown for ordrelinjer.
+    public IReadOnlyList<ProductDto> Products => ProductState.Products;
+
+    // Kunder bruges i dropdown for valg af kunde.
+    public IReadOnlyList<CustomerDto> Customers => CustomerState.Customers;
+
+    protected override async Task OnInitializedAsync()
     {
-        // Initialiserer request-modellen med systemfelter,
-        // som API'et forventer ved oprettelse.
         CreateRequest = new CreateOrderRequest
         {
             Id = Guid.NewGuid(),
@@ -40,12 +46,86 @@ public partial class OrderCreate
             TotalPrice = 0,
             OrderDetails = new List<CreateOrderDetailRequest>()
         };
+
+        try
+        {
+            // Henter produkter til produkt-dropdown.
+            await ProductState.LoadProductsAsync();
+
+            // Henter kunder til kunde-dropdown.
+            await CustomerState.LoadCustomersAsync();
+        }
+        catch (Exception ex)
+        {
+            SetError($"Fejl ved hentning af data: {ex.Message}");
+            return;
+        }
+
+        AddOrderDetail();
+    }
+
+    public void AddOrderDetail()
+    {
+        if (CreateRequest is null)
+        {
+            return;
+        }
+
+        CreateRequest.OrderDetails.Add(new CreateOrderDetailRequest
+        {
+            Id = Guid.NewGuid(),
+            Quantity = 1,
+            UnitPrice = 0
+        });
+
+        RecalculateTotalPrice();
+    }
+
+    public void RemoveOrderDetail(CreateOrderDetailRequest detail)
+    {
+        if (CreateRequest is null)
+        {
+            return;
+        }
+
+        CreateRequest.OrderDetails.Remove(detail);
+        RecalculateTotalPrice();
+    }
+
+    public void OnProductChanged(CreateOrderDetailRequest detail)
+    {
+        ProductDto? selectedProduct = Products.FirstOrDefault(product => product.Id == detail.ProductId);
+
+        if (selectedProduct is not null)
+        {
+            detail.UnitPrice = selectedProduct.UnitPrice;
+        }
+        else
+        {
+            detail.UnitPrice = 0;
+        }
+
+        RecalculateTotalPrice();
+    }
+
+    public void OnQuantityChanged()
+    {
+        RecalculateTotalPrice();
+    }
+
+    public void RecalculateTotalPrice()
+    {
+        if (CreateRequest is null)
+        {
+            return;
+        }
+
+        CreateRequest.TotalPrice = CreateRequest.OrderDetails.Sum(detail =>
+            detail.Quantity * detail.UnitPrice);
     }
 
     public async Task CreateAsync()
     {
-        // Guard clause:
-        // Oprettelse kan ikke fortsætte uden model.
         if (CreateRequest is null)
         {
             SetError("Ordredata kunne ikke initialiseres.");
@@ -54,22 +134,47 @@ public partial class OrderCreate
 
         ClearError();
 
-        // Validerer at CustomerId er et gyldigt Guid.
-        if (!Guid.TryParse(CustomerIdText, out Guid customerId))
+        if (CreateRequest.CustomerId == Guid.Empty)
         {
-            SetError("Customer Id skal være et gyldigt Guid.");
+            SetError("Der skal vælges en kunde.");
             return;
         }
 
-        CreateRequest.CustomerId = customerId;
+        if (CreateRequest.OrderDetails.Count == 0)
+        {
+            SetError("Ordren skal have mindst én produktlinje.");
+            return;
+        }
+
+        foreach (CreateOrderDetailRequest detail in CreateRequest.OrderDetails)
+        {
+            if (detail.ProductId == Guid.Empty)
+            {
+                SetError("Alle ordrelinjer skal have et valgt produkt.");
+                return;
+            }
+
+            if (detail.Quantity <= 0)
+            {
+                SetError("Antal skal være større end 0.");
+                return;
+            }
+
+            if (detail.UnitPrice < 0)
+            {
+                SetError("Enhedspris kan ikke være negativ.");
+                return;
+            }
+
+            detail.OrderId = CreateRequest.Id;
+        }
+
+        RecalculateTotalPrice();
         IsSaving = true;
 
         try
         {
-            // Opretter ordren via state-laget.
-            OrderDto createdOrder = await OrderState.CreateOrderAsync(CreateRequest);
-
-            // Navigerer tilbage til ordreoversigten efter vellykket oprettelse.
+            await OrderState.CreateOrderAsync(CreateRequest);
             NavigationManager.NavigateTo("/orders");
         }
         catch (Exception ex)
@@ -84,7 +189,6 @@ public partial class OrderCreate
 
     public void Cancel()
     {
-        // Går tilbage til ordreoversigten uden at oprette noget.
         NavigationManager.NavigateTo("/orders");
     }
 
