@@ -262,3 +262,49 @@ code {
     font-size: 14px;
     color: #666;
 }
+
+/* Custom Modal Styles for popup Order Viewing */
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+.modal-dialog-custom {
+    width: 90%;
+    max-width: 900px;
+}
+
+.modal-content-custom {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modal-header-custom,
+.modal-footer-custom {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer-custom {
+    border-top: 1px solid #dee2e6;
+    border-bottom: none;
+    display: flex;
+    justify-content: end;
+    gap: 0.5rem;
+}
+
+.modal-body-custom {
+    padding: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}

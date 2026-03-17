@@ -1,163 +1,436 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
 using Lagersystem.Blazor.Models.Requests;
+using Lagersystem.Blazor.Models.ViewModels;
 using Lagersystem.Blazor.State;
+using Lagersystem.Blazor.Utilities;
 using Microsoft.AspNetCore.Components;
 
 namespace Lagersystem.Blazor.Pages;
 
 public partial class OrderView
 {
-    // OrderState bruges som mellemled mellem UI og service-lag.
-    // Komponenten skal ikke selv kende til HttpClient eller API-endpoints.
     [Inject]
     public OrderState OrderState { get; set; } = default!;
 
-    // CustomerState bruges til at hente kunder,
-    // så ordrelisten kan vise kundenavne i stedet for rå id'er.
     [Inject]
     public CustomerState CustomerState { get; set; } = default!;
 
-    // NavigationManager bruges til at navigere til andre sider,
-    // fx siden for oprettelse af en ny ordre.
+    [Inject]
+    public ProductState ProductState { get; set; } = default!;
+
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
-    // Listen der vises i tabellen.
     public IReadOnlyList<OrderDto> Orders => OrderState.Orders;
 
-    // Bruges til opslag af kundenavne ud fra CustomerId.
     public IReadOnlyList<CustomerDto> Customers => CustomerState.Customers;
 
-    // Den valgte ordre bruges til at vise detaljer over tabellen.
+    public IReadOnlyList<ProductDto> Products => ProductState.Products;
+
     public OrderDto? SelectedOrder => OrderState.SelectedOrder;
 
-    // Bruges til loading-besked og til at deaktivere knapper under hentning.
-    public bool IsLoading => OrderState.IsLoading || CustomerState.IsLoading;
+    public bool IsLoading => OrderState.IsLoading || CustomerState.IsLoading || ProductState.IsLoading;
 
-    // Fejltekst hvis API-kald fejler.
-    public string ErrorMessage { get; set; } = string.Empty;
+    public string PageErrorMessage { get; set; } = string.Empty;
 
-    // Bruges til at styre om fejlbeskeden skal vises.
-    public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+    public string ModalErrorMessage { get; set; } = string.Empty;
 
-    // Viser tom-besked når listen er tom og der ikke længere hentes data.
+    public bool HasPageError => !string.IsNullOrWhiteSpace(PageErrorMessage);
+
+    public bool HasModalError => !string.IsNullOrWhiteSpace(ModalErrorMessage);
+
     public bool ShowEmptyMessage => !IsLoading && Orders.Count == 0;
 
-    // Når siden åbner første gang, hentes både ordrer og kunder.
+    public bool IsEditModalOpen { get; set; }
+
+    public EditableOrderViewModel? EditableOrder { get; set; }
+
+    private Guid _newProductId;
+
+    public Guid NewProductId
+    {
+        get => _newProductId;
+        set
+        {
+            _newProductId = value;
+            UpdateNewUnitPriceFromSelectedProduct();
+        }
+    }
+
+    public int NewQuantity { get; set; } = 1;
+
+    public decimal NewUnitPrice { get; set; }
+
+    public IReadOnlyList<GroupedOrderDetailViewModel> GroupedOrderDetails
+    {
+        get
+        {
+            if (EditableOrder is null || EditableOrder.OrderDetails.Count == 0)
+            {
+                return new List<GroupedOrderDetailViewModel>();
+            }
+
+            if (HasDuplicateProductsWithDifferentPrice())
+            {
+                return new List<GroupedOrderDetailViewModel>();
+            }
+
+            return OrderDetailGroupingHelper.GroupOrderDetails(
+                EditableOrder.OrderDetails,
+                GetProductDisplayName);
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadPageDataAsync();
     }
 
-    // Kaldes fra knappen "Genindlæs ordrer".
     public async Task ReloadOrdersAsync()
     {
         await LoadPageDataAsync();
     }
 
-    // Henter både ordrer og kunder,
-    // så tabellen kan vise læsbare kundenavne.
     private async Task LoadPageDataAsync()
     {
-        ClearError();
+        ClearPageError();
 
         try
         {
             await OrderState.LoadOrdersAsync();
             await CustomerState.LoadCustomersAsync();
+            await ProductState.LoadProductsAsync();
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved hentning af data: {ex.Message}");
+            SetPageError($"Fejl ved hentning af data: {ex.Message}");
         }
     }
 
     public void OpenCreateOrderPage()
     {
-        // Navigerer til siden for oprettelse af en ny ordre.
         NavigationManager.NavigateTo("/orders/create");
     }
 
-    // Henter den konkrete ordre igen ud fra dens id.
-    // Det er nyttigt hvis man vil vise detaljer eller senere lave edit-view.
     public async Task SelectOrderAsync(OrderDto order)
     {
-        ClearError();
+        ClearPageError();
+        ClearModalError();
 
         try
         {
             await OrderState.LoadOrderByIdAsync(order.Id);
+
+            if (SelectedOrder is null)
+            {
+                SetPageError("Ordren kunne ikke hentes.");
+                return;
+            }
+
+            EditableOrder = MapToEditableOrder(SelectedOrder);
+            IsEditModalOpen = true;
+            ResetNewDetailInputs();
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved hentning af valgt ordre: {ex.Message}");
+            SetPageError($"Fejl ved hentning af valgt ordre: {ex.Message}");
         }
+    }
+
+    public void CloseEditModal()
+    {
+        IsEditModalOpen = false;
+        EditableOrder = null;
+        OrderState.ClearSelectedOrder();
+        ResetNewDetailInputs();
+        ClearModalError();
+    }
+
+    private bool CanAddProductToOrder(ProductDto product, int quantityToAdd, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        if (EditableOrder is null)
+        {
+            errorMessage = "Der er ingen ordre klar til redigering.";
+            return false;
+        }
+
+        if (quantityToAdd <= 0)
+        {
+            errorMessage = "Antal skal være større end 0.";
+            return false;
+        }
+
+        if (product.UnitStatus != UnitStatus.InStock)
+        {
+            errorMessage = "Produktet kan ikke tilføjes, fordi det ikke er på lager.";
+            return false;
+        }
+
+        int existingQuantityInOrder = EditableOrder.OrderDetails
+            .Where(detail => detail.ProductId == product.Id)
+            .Sum(detail => detail.Quantity);
+
+        int requestedTotalQuantity = existingQuantityInOrder + quantityToAdd;
+
+        if (requestedTotalQuantity > product.UnitStock)
+        {
+            errorMessage =
+                $"Der er ikke nok på lager. Produktet har {product.UnitStock} stk. på lager, og ordren forsøger at bruge {requestedTotalQuantity} stk.";
+            return false;
+        }
+
+        return true;
+    }
+
+    public void AddOrderDetail()
+    {
+        ClearModalError();
+
+        if (EditableOrder is null)
+        {
+            SetModalError("Der er ingen ordre klar til redigering.");
+            return;
+        }
+
+        if (NewProductId == Guid.Empty)
+        {
+            SetModalError("Der skal vælges et produkt.");
+            return;
+        }
+
+        ProductDto? selectedProduct = Products.FirstOrDefault(product => product.Id == NewProductId);
+
+        if (selectedProduct is null)
+        {
+            SetModalError("Det valgte produkt blev ikke fundet.");
+            return;
+        }
+
+        if (!CanAddProductToOrder(selectedProduct, NewQuantity, out string errorMessage))
+        {
+            SetModalError(errorMessage);
+            return;
+        }
+
+        EditableOrder.OrderDetails.Add(new EditableOrderDetailViewModel
+        {
+            Id = Guid.NewGuid(),
+            OrderId = EditableOrder.Id,
+            ProductId = NewProductId,
+            Quantity = NewQuantity,
+            UnitPrice = selectedProduct.UnitPrice
+        });
+
+        RecalculateTotalPrice();
+        ResetNewDetailInputs();
+    }
+
+    public void RemoveGroupedProduct(Guid productId, decimal unitPrice)
+    {
+        ClearModalError();
+
+        if (EditableOrder is null)
+        {
+            SetModalError("Der er ingen ordre klar til redigering.");
+            return;
+        }
+
+        EditableOrder.OrderDetails.RemoveAll(detail =>
+            detail.ProductId == productId &&
+            detail.UnitPrice == unitPrice);
+
+        RecalculateTotalPrice();
     }
 
     public async Task UpdateSelectedOrderAsync()
     {
-        ClearError();
+        ClearModalError();
 
-        if (SelectedOrder is null)
+        if (EditableOrder is null)
         {
-            SetError("Der skal vælges en ordre før opdatering.");
+            SetModalError("Der skal vælges en ordre før opdatering.");
+            return;
+        }
+
+        if (HasDuplicateProductsWithDifferentPrice())
+        {
+            SetModalError(GetDuplicateProductPriceError());
             return;
         }
 
         try
         {
-            // Bygger en update-request ud fra den valgte ordre.
-            // Her genbruges de nuværende værdier som simpel test.
+            List<UpdateOrderDetailRequest> orderDetails = EditableOrder.OrderDetails
+                .Select(detail => new UpdateOrderDetailRequest
+                {
+                    Id = detail.Id,
+                    OrderId = EditableOrder.Id,
+                    ProductId = detail.ProductId,
+                    Quantity = detail.Quantity,
+                    UnitPrice = detail.UnitPrice
+                })
+                .ToList();
+
             UpdateOrderRequest request = new()
             {
-                Id = SelectedOrder.Id,
-                CustomerId = SelectedOrder.CustomerId,
-                OrderDate = SelectedOrder.OrderDate,
-                TotalPrice = SelectedOrder.TotalPrice
+                Id = EditableOrder.Id,
+                CustomerId = EditableOrder.CustomerId,
+                OrderDate = EditableOrder.OrderDate,
+                TotalPrice = orderDetails.Sum(detail => detail.Quantity * detail.UnitPrice),
+                OrderDetails = orderDetails
             };
 
-            // Kalder state-laget, som derefter opdaterer via API'et.
-            await OrderState.UpdateOrderAsync(SelectedOrder.Id, request);
+            Console.WriteLine($"Saving order {request.Id}");
+            Console.WriteLine($"OrderDetails count: {request.OrderDetails.Count}");
+
+            foreach (UpdateOrderDetailRequest detail in request.OrderDetails)
+            {
+                Console.WriteLine(
+                    $"Detail -> Id: {detail.Id}, OrderId: {detail.OrderId}, ProductId: {detail.ProductId}, Quantity: {detail.Quantity}, UnitPrice: {detail.UnitPrice}");
+            }
+
+            await OrderState.UpdateOrderAsync(EditableOrder.Id, request);
+
+            CloseEditModal();
+            await LoadPageDataAsync();
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved opdatering af ordre: {ex.Message}");
+            SetModalError($"Fejl ved opdatering af ordre: {ex.Message}");
         }
     }
 
     public async Task DeleteOrderAsync(Guid id)
     {
-        ClearError();
+        ClearPageError();
 
         try
         {
-            // Kalder state-laget, som derefter sletter ordren via API'et.
             await OrderState.DeleteOrderAsync(id);
+
+            if (SelectedOrder?.Id == id)
+            {
+                CloseEditModal();
+            }
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved sletning af ordre: {ex.Message}");
+            SetPageError($"Fejl ved sletning af ordre: {ex.Message}");
         }
     }
 
-    // Finder kundenavn ud fra customer-id.
-    // Returnerer id som tekst hvis kunden ikke findes i den hentede liste.
+    private EditableOrderViewModel MapToEditableOrder(OrderDto order)
+    {
+        return new EditableOrderViewModel
+        {
+            Id = order.Id,
+            CustomerId = order.CustomerId,
+            OrderDate = order.OrderDate,
+            TotalPrice = order.TotalPrice,
+            OrderDetails = order.OrderDetails
+                .Select(detail => new EditableOrderDetailViewModel
+                {
+                    Id = detail.Id,
+                    OrderId = detail.OrderId,
+                    ProductId = detail.ProductId,
+                    Quantity = detail.Quantity,
+                    UnitPrice = detail.UnitPrice
+                })
+                .ToList()
+        };
+    }
+
+    private void UpdateNewUnitPriceFromSelectedProduct()
+    {
+        if (NewProductId == Guid.Empty)
+        {
+            NewUnitPrice = 0;
+            return;
+        }
+
+        ProductDto? selectedProduct = Products.FirstOrDefault(product => product.Id == NewProductId);
+
+        if (selectedProduct is null)
+        {
+            NewUnitPrice = 0;
+            return;
+        }
+
+        NewUnitPrice = selectedProduct.UnitPrice;
+    }
+
+    private void RecalculateTotalPrice()
+    {
+        if (EditableOrder is null)
+        {
+            return;
+        }
+
+        EditableOrder.TotalPrice = EditableOrder.OrderDetails
+            .Sum(detail => detail.Quantity * detail.UnitPrice);
+    }
+
+    private void ResetNewDetailInputs()
+    {
+        NewProductId = Guid.Empty;
+        NewQuantity = 1;
+        NewUnitPrice = 0;
+    }
+
+    private bool HasDuplicateProductsWithDifferentPrice()
+    {
+        if (EditableOrder is null)
+        {
+            return false;
+        }
+
+        return OrderDetailGroupingHelper.HasDuplicateProductsWithDifferentPrice(
+            EditableOrder.OrderDetails);
+    }
+
+    private string GetDuplicateProductPriceError()
+    {
+        if (EditableOrder is null)
+        {
+            return string.Empty;
+        }
+
+        return OrderDetailGroupingHelper.GetDuplicateProductPriceError(
+            EditableOrder.OrderDetails,
+            GetProductDisplayName);
+    }
+
     public string GetCustomerDisplayName(Guid customerId)
     {
         CustomerDto? customer = Customers.FirstOrDefault(c => c.Id == customerId);
-
         return customer?.Name ?? customerId.ToString();
     }
 
-    // Nulstiller tidligere fejl før et nyt API-kald.
-    private void ClearError()
+    public string GetProductDisplayName(Guid productId)
     {
-        ErrorMessage = string.Empty;
+        ProductDto? product = Products.FirstOrDefault(product => product.Id == productId);
+        return product?.Name ?? productId.ToString();
     }
 
-    // Sætter fejlbesked hvis noget går galt.
-    private void SetError(string message)
+    private void ClearPageError()
     {
-        ErrorMessage = message;
+        PageErrorMessage = string.Empty;
+    }
+
+    private void SetPageError(string message)
+    {
+        PageErrorMessage = message;
+    }
+
+    private void ClearModalError()
+    {
+        ModalErrorMessage = string.Empty;
+    }
+
+    private void SetModalError(string message)
+    {
+        ModalErrorMessage = message;
     }
 }
