@@ -1,6 +1,8 @@
 ﻿using API.Models;
 using API.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -83,7 +85,30 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            User? user = await _repo.GetByEmail(dto.Email);
+            if (user == null || user.Password!= dto.Password)
+                return Unauthorized();
+
+
+            var claims = new List<Claim>
+        {
+            new Claim("username", user.Name),
+            new Claim("Role", user.IsAdmin ? "Admin" : "Normal") //xonvert boolean to string
+        };
+
+            var identity = new ClaimsIdentity(claims, "Cookies");
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("Cookies", principal);
+
+            return Ok();
+        }
+
+            [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User user)
         {
             if (!ModelState.IsValid)

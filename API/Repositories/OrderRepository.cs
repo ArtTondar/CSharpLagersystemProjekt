@@ -29,7 +29,7 @@ namespace API.Repositories
 
         public async Task<List<Order>> GetAll()
         {
-            return await _dbContext.Orders.AsNoTracking().ToListAsync();
+            return await _dbContext.Orders.Include(o => o.OrderDetails).AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Order>> GetByDate(DateTime start, DateTime? end = null)

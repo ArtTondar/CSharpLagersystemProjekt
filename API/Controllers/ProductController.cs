@@ -1,6 +1,7 @@
 ﻿using API.Models;
 using API.Repositories;
 using API.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -179,7 +180,7 @@ namespace API.Controllers
                 return StatusCode(500, "An error occured while creating product.");
             }
         }
-
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] Product product)
         {
@@ -209,7 +210,7 @@ namespace API.Controllers
                 return StatusCode(500, "An error occurred while updating product.");
             }
         }
-
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
