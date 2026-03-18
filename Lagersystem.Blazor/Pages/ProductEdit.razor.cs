@@ -74,7 +74,7 @@ public partial class ProductEdit
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved hentning af produkt: {ex.Message}");
+            SetError($"Fejl ved hentning af produkt");
         }
     }
 
@@ -102,7 +102,7 @@ public partial class ProductEdit
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved gemning af produkt: {ex.Message}");
+            SetError($"Fejl ved gemning af produkt");
         }
         finally
         {

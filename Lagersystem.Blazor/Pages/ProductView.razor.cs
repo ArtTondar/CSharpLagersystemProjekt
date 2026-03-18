@@ -66,7 +66,7 @@ public partial class ProductView
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved hentning af produkter: {ex.Message}");
+            SetError($"Fejl ved hentning af produkter");
         }
     }
 
@@ -116,7 +116,7 @@ public partial class ProductView
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved sletning af produkt: {ex.Message}");
+            SetError($"Fejl ved sletning af produkt");
         }
     }
     // Nulstiller tidligere fejl før et nyt API-kald.
