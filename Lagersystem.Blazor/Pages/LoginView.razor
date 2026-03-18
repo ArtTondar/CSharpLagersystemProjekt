@@ -9,6 +9,25 @@
         <h2 class="login-title">Login</h2>
         <p class="login-subtitle">Login for at fortsætte</p>
 
+
+
+
+
+        <input class="form-control"
+               placeholder="Indtast brugernavn"
+               @bind-value="Email"
+               @bind-value:event="oninput" />
+
+        <input type="password"
+               class="form-control"
+               placeholder="Indtast kodeord"
+               @bind-value="Password"
+               @bind-value:event="oninput" />
+
+        <button class="btn btn-primary login-button" @onclick="TryLoginAsync">
+            Login
+        </button>
+@* 
         <!-- Username -->
         <div class="login-field">
             <label>Brugernavn</label>
@@ -19,12 +38,12 @@
         <div class="login-field">
             <label>Kodeord</label>
             <input type="password" class="form-control" placeholder="Indtast kodeord" />
-        </div>
+        </div> *@
 
-        <!-- Button Logic -->
-        <button class="btn btn-primary login-button">
+@*         <!-- Button Logic -->
+        <button class="btn btn-primary login-button" @onclick="() => TryLoginAsync()">
             Login
-        </button>
+        </button> *@
 
         <p class="login-footer">
             Lagersystem

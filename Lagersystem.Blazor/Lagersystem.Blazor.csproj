@@ -16,6 +16,7 @@
 		<Folder Include="Extensions\" />
 		<Folder Include="Services\" />
 		<Folder Include="State\" />
+		<Folder Include="Utilities\" />
 	</ItemGroup>
 
 </Project>

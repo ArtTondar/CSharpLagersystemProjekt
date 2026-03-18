@@ -26,6 +26,16 @@ public class OrderState
         try
         {
             Orders = await _orderService.GetOrdersAsync();
+
+            foreach (var order in Orders)
+            {
+                decimal totalPrice = 0;
+                foreach (var orderDetail in order.OrderDetails)
+                {
+                    totalPrice += orderDetail.UnitPrice * orderDetail.Quantity;
+                }
+                order.TotalPrice = totalPrice;
+            }
         }
         finally
         {
@@ -40,6 +50,15 @@ public class OrderState
         try
         {
             SelectedOrder = await _orderService.GetOrderByIdAsync(id);
+            if(SelectedOrder!= null)
+            {
+                decimal totalPrice = 0;
+                foreach (var orderDetail in SelectedOrder.OrderDetails)
+                {
+                    totalPrice += orderDetail.UnitPrice * orderDetail.Quantity;
+                }
+                SelectedOrder.TotalPrice = totalPrice;
+            }
         }
         finally
         {

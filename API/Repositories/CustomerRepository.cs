@@ -32,17 +32,17 @@ namespace API.Repositories
 
         public async Task<Customer?> GetByEmail(string email)
         {
-            return await _dbContext.Customers.Where(c=>c.Email == email).AsNoTracking().FirstOrDefaultAsync();
+            return await _dbContext.Customers.Include(c => c.Orders).Where(c=>c.Email == email).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<Customer?> GetById(Guid id)
         {
-            return await _dbContext.Customers.Where(c => c.Id == id).AsNoTracking().FirstOrDefaultAsync();
+            return await _dbContext.Customers.Include(c => c.Orders).Where(c => c.Id == id).Include(c=>c.Orders).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<Customer?> GetByPhone(string phone)
         {
-            return await _dbContext.Customers.Where(c => c.Phone == phone).AsNoTracking().FirstOrDefaultAsync();
+            return await _dbContext.Customers.Include(c => c.Orders).Where(c => c.Phone == phone).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task Update(Customer customer)
