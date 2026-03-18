@@ -1,6 +1,6 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
+using Lagersystem.Blazor.Models.Requests;
 using Lagersystem.Blazor.Services.Abstractions;
-
 namespace Lagersystem.Blazor.State;
 
 public class ProductState
@@ -103,6 +103,8 @@ public class ProductState
 
         try
         {
+            // Henter et enkelt produkt fra service-laget
+            // og gemmer det som valgt produkt i state.
             SelectedProduct = await _productService.GetProductByIdAsync(id);
         }
         finally
@@ -115,4 +117,61 @@ public class ProductState
     {
         SelectedProduct = product;
     }
+
+    // --------------------------------------------------------
+    // PRODUCT UPDATES
+    // --------------------------------------------------------
+    public async Task UpdateProductAsync(Guid id, UpdateProductRequest request)
+    {
+        // Guard clause:
+        // Request må ikke være null.
+        ArgumentNullException.ThrowIfNull(request);
+
+        IsLoading = true;
+
+        try
+        {
+            // Kalder service-laget, som sender PUT-request til API'et.
+            await _productService.UpdateProductAsync(id, request);
+
+            // Opretter en ny DTO med de opdaterede værdier,
+            // så state afspejler ændringen uden at kræve en fuld reload.
+            ProductDto updatedProduct = new()
+            {
+                Id = id,
+                Name = request.Name,
+                Description = request.Description,
+                UnitPrice = request.UnitPrice,
+                Size = request.Size,
+                Warehouse = request.Warehouse,
+                UnitStock = request.UnitStock,
+                UnitStatus = request.UnitStatus
+            };
+
+            // Kopierer den eksisterende liste til en ny liste,
+            // så state opdateres på en kontrolleret måde.
+            List<ProductDto> updatedProducts = Products.ToList();
+
+            int index = updatedProducts.FindIndex(product => product.Id == id);
+
+            // Hvis produktet findes i listen, erstattes det med den nye version.
+            if (index >= 0)
+            {
+                updatedProducts[index] = updatedProduct;
+                Products = updatedProducts;
+            }
+
+            // Hvis det valgte produkt er det samme som det opdaterede,
+            // opdateres SelectedProduct også.
+            if (SelectedProduct?.Id == id)
+            {
+                SelectedProduct = updatedProduct;
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
 }

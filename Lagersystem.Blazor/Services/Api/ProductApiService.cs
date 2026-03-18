@@ -25,9 +25,21 @@ public class ProductApiService : IProductService
 
     public async Task<ProductDto?> GetProductByIdAsync(Guid id)
     {
-        // Henter ét produkt ud fra id.
+        // Henter et enkelt produkt fra API'et via det route-navn,
+        // som controlleren faktisk eksponerer.
+        HttpResponseMessage response = await _httpClient.GetAsync(
+            $"api/Product/get-product-by-id/{id}");
+
         // Returnerer null hvis produktet ikke findes.
-        return await _httpClient.GetFromJsonAsync<ProductDto>($"api/Product/get-product-by-id/{id}");
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        // Validerer at kaldet lykkedes.
+        await ApiResponseHandler.EnsureSuccessAsync(response);
+
+        return await response.Content.ReadFromJsonAsync<ProductDto>();
     }
 
     public async Task<IReadOnlyList<ProductDto>> GetProductsByNameAsync(string name)
@@ -99,22 +111,21 @@ public class ProductApiService : IProductService
         // Tjekker om API'et accepterede requestet.
         await ApiResponseHandler.EnsureSuccessAsync(response);
     }
-
-    public Task UpdateProductAsync(Guid id, UpdateProductRequest request)
+    public async Task UpdateProductAsync(Guid id, UpdateProductRequest request)
     {
-        // Placeholder:
-        // API'et forventer lige nu en model hvor Id findes i body,
-        // fordi controlleren sammenligner route-id med product.Id.
-        //
-        // UpdateProductRequest har ikke Id endnu,
-        // så denne metode bør vente til request-modellen matcher API'et.
-        //
-        // Når den er klar, kan den implementeres med en model,
-        // der indeholder Id og sendes til:
-        // api/Product/{id}
+        // Guard clause:
+        // Request må ikke være null.
+        ArgumentNullException.ThrowIfNull(request);
 
-        throw new NotImplementedException(
-            "Product update er ikke klar endnu, fordi request-modellen ikke matcher API'et.");
+        // Sørger for at route-id og body-id altid matcher,
+        // så API'et ikke afviser requestet.
+        request.Id = id;
+
+        // Sender opdateringen til API'et.
+        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/Product/{id}", request);
+
+        // Validerer at API-kaldet lykkedes.
+        await ApiResponseHandler.EnsureSuccessAsync(response);
     }
 
     public async Task DeleteProductAsync(Guid id)
