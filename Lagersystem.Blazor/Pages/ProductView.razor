@@ -21,10 +21,15 @@
     }
 
     <div class="mb-3">
-        <button class="btn btn-outline-primary"
+        <button class="btn btn-outline-primary me-2"
                 @onclick="ReloadProductsAsync"
                 disabled="@IsLoading">
             Genindlæs produkter
+        </button>
+
+        <button class="btn btn-success"
+                @onclick="OpenCreateProductPage">
+            Opret produkt
         </button>
     </div>
 
