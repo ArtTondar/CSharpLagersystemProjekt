@@ -1,6 +1,7 @@
 using API.Repositories;
 using API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +15,23 @@ builder.Services.AddCors(options =>
                 "https://localhost:7187",
                 "http://localhost:5045")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.Cookie.SameSite = SameSiteMode.None; // allow cross-site
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS required
+    });
+
+builder.Services.AddAuthorization();
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -45,6 +56,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("BlazorClient");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
