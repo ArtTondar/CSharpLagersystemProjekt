@@ -173,6 +173,37 @@ public class ProductState
             IsLoading = false;
         }
     }
+    // --------------------------------------------------------
+    // CREATE PRODUCT
+    // --------------------------------------------------------
+    public async Task<ProductDto> CreateProductAsync(CreateProductRequest request)
+    {
+        // Guard clause:
+        // Request må ikke være null.
+        ArgumentNullException.ThrowIfNull(request);
+
+        IsLoading = true;
+
+        try
+        {
+            // Kalder service-laget, som sender POST-request til API'et.
+            ProductDto createdProduct = await _productService.CreateProductAsync(request);
+
+            // Lægger det nye produkt ind i den lokale state,
+            // så listen kan opdateres uden fuld genindlæsning.
+            List<ProductDto> updatedProducts = Products.ToList();
+            updatedProducts.Add(createdProduct);
+
+            Products = updatedProducts;
+            SelectedProduct = createdProduct;
+
+            return createdProduct;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 
     // --------------------------------------------------------
     // DELETE PRODUCT
