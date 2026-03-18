@@ -63,7 +63,7 @@ public partial class ProductCreate
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved oprettelse af produkt: {ex.Message}");
+            SetError($"Fejl ved oprettelse af produkt");
         }
         finally
         {

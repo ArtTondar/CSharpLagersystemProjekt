@@ -57,7 +57,7 @@ public partial class OrderCreate
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved hentning af data: {ex.Message}");
+            SetError($"Fejl ved hentning af data");
             return;
         }
 
@@ -179,7 +179,7 @@ public partial class OrderCreate
         }
         catch (Exception ex)
         {
-            SetError($"Fejl ved oprettelse af ordre: {ex.Message}");
+            SetError($"Fejl ved oprettelse af ordre");
         }
         finally
         {

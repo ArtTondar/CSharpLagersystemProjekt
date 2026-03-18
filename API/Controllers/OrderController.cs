@@ -39,7 +39,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while retrieving order with id {OrderId}", id);
-                return StatusCode(500, $"An error occured while retrieving order: {ex.Message}");
+                return StatusCode(500, $"An error occured while retrieving order");
             }
         }
 
@@ -54,7 +54,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while retrieving orders");
-                return StatusCode(500, $"An error occurred while retrieving orders: {ex.Message}");
+                return StatusCode(500, $"An error occurred while retrieving orders");
             }
         }
 
@@ -69,7 +69,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while retrieving orders for customer {CustomerId}", customerId);
-                return StatusCode(500, $"An error occurred while retrieving orders: {ex.Message}");
+                return StatusCode(500, $"An error occurred while retrieving orders");
             }
         }
 
@@ -84,7 +84,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while retrieving orders by date range");
-                return StatusCode(500, $"An error occurred while retrieving orders: {ex.Message}");
+                return StatusCode(500, $"An error occurred while retrieving orders");
             }
         }
 
@@ -99,7 +99,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while retrieving orders by total price {TotalPrice}", totalPrice);
-                return StatusCode(500, $"An error occurred while retrieving orders: {ex.Message}");
+                return StatusCode(500, $"An error occurred while retrieving orders");
             }
         }
 
@@ -119,7 +119,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while creating order");
-                return StatusCode(500, $"An error occurred while creating order: {ex.Message}");
+                return StatusCode(500, $"An error occurred while creating order");
             }
         }
 
@@ -160,7 +160,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while updating order with id {OrderId}", id);
-                return StatusCode(500, $"An error occurred while updating order: {ex.Message}");
+                return StatusCode(500, $"An error occurred while updating order");
             }
         }
 
@@ -182,7 +182,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while deleting order with id {OrderId}", id);
-                return StatusCode(500, $"An error occurred while deleting order: {ex.Message}");
+                return StatusCode(500, $"An error occurred while deleting order");
             }
         }
     }
