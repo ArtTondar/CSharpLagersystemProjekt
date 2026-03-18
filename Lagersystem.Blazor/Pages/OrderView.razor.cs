@@ -103,7 +103,7 @@ public partial class OrderView
         }
         catch (Exception ex)
         {
-            SetPageError($"Fejl ved hentning af data: {ex.Message}");
+            SetPageError($"Fejl ved hentning af data:");
         }
     }
 
@@ -133,7 +133,7 @@ public partial class OrderView
         }
         catch (Exception ex)
         {
-            SetPageError($"Fejl ved hentning af valgt ordre: {ex.Message}");
+            SetPageError($"Fejl ved hentning af valgt ordre");
         }
     }
 
@@ -298,7 +298,7 @@ public partial class OrderView
         }
         catch (Exception ex)
         {
-            SetModalError($"Fejl ved opdatering af ordre: {ex.Message}");
+            SetModalError($"Fejl ved opdatering af ordre");
         }
     }
 
@@ -317,7 +317,7 @@ public partial class OrderView
         }
         catch (Exception ex)
         {
-            SetPageError($"Fejl ved sletning af ordre: {ex.Message}");
+            SetPageError($"Fejl ved sletning af ordre");
         }
     }
 
