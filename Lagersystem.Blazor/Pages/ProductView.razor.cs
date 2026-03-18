@@ -1,11 +1,22 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
 using Lagersystem.Blazor.State;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace Lagersystem.Blazor.Pages;
 
+
+
 public partial class ProductView
 {
+
+    // IJSRuntime bruges til at kalde JavaScript fra Blazor.
+    // Her anvendes det til at vise en browser confirm-dialog før sletning,
+    // så brugeren kan bekræfte handlingen.
+    [Inject]
+    public IJSRuntime JS { get; set; } = default!;
+
+
     // ProductState bruges som mellemled mellem UI og service-lag.
     // Komponenten skal kun bede state om data, ikke kalde API direkte.
     [Inject]
@@ -66,6 +77,33 @@ public partial class ProductView
         NavigationManager.NavigateTo($"/products/{productId}");
     }
 
+    // Sletter et produkt via state-laget
+    // og opdaterer tabellen uden genindlæsning.
+    public async Task DeleteProductAsync(Guid productId)
+    {
+        ClearError();
+
+        try
+        {
+            // Viser en browser confirm dialog.
+            bool confirmed = await JS.InvokeAsync<bool>(
+                "confirm",
+                "Er du sikker på, at du vil slette dette produkt?");
+
+            // Stopper hvis brugeren annullerer.
+            if (!confirmed)
+            {
+                return;
+            }
+
+            // Kalder state-laget for at slette produktet.
+            await ProductState.DeleteProductAsync(productId);
+        }
+        catch (Exception ex)
+        {
+            SetError($"Fejl ved sletning af produkt: {ex.Message}");
+        }
+    }
     // Gemmer valgt produkt i state.
     // Kan stadig beholdes midlertidigt, hvis anden eksisterende kode bruger den.
     public void SelectProduct(ProductDto product)

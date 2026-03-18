@@ -40,6 +40,7 @@
                     <th>UnitStock</th>
                     <th>UnitStatus</th>
                     <th>Edit</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
 
@@ -47,7 +48,7 @@
                 @if (ShowEmptyMessage)
                 {
                     <tr>
-                        <td colspan="8">Ingen produkter fundet.</td>
+                        <td colspan="9">Ingen produkter fundet.</td>
                     </tr>
                 }
                 else
@@ -63,7 +64,17 @@
                             <td>@product.UnitStock</td>
                             <td>@product.UnitStatus</td>
                             <td>
-                                <button @onclick="() => OpenProduct(product.Id)">Vælg</button>
+                                <button class="btn btn-sm btn-primary"
+                                        @onclick="() => OpenProduct(product.Id)">
+                                    Vælg
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger"
+                                        @onclick="() => DeleteProductAsync(product.Id)"
+                                        disabled="@IsLoading">
+                                    Slet
+                                </button>
                             </td>
                         </tr>
                     }
