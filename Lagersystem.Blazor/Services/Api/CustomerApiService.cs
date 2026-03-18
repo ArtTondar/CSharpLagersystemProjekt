@@ -25,9 +25,8 @@ public class CustomerApiService : ICustomerService
 
     public async Task<CustomerDto?> GetCustomerByIdAsync(Guid id)
     {
-        // Placeholder til at hente én kunde ud fra id.
-        // Denne metode er nyttig, hvis man senere vil have en kundedetaljeside.
-
-        return await _apiClient.GetAsync<CustomerDto>($"api/Customer/{id}");
+        // Henter én kunde ud fra id via det route-navn,
+        // som controlleren faktisk eksponerer.
+        return await _apiClient.GetAsync<CustomerDto>($"api/Customer/get-customer-by-id/{id}");
     }
 }

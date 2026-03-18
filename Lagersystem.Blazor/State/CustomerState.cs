@@ -9,6 +9,7 @@ public class CustomerState
 
     public IReadOnlyList<CustomerDto> Customers { get; private set; } = new List<CustomerDto>();
 
+
     public CustomerDto? SelectedCustomer { get; private set; }
 
     public bool IsLoading { get; private set; }
