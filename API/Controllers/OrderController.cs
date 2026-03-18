@@ -1,11 +1,13 @@
 ﻿using API.Models;
 using API.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly IOrderRepository _repo;
