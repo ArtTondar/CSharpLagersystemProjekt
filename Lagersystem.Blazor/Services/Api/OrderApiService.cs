@@ -67,7 +67,7 @@ public class OrderApiService : IOrderService
                ?? new List<OrderDto>();
     }
 
-    public async Task CreateOrderAsync(CreateOrderRequest request)
+    public async Task<OrderDto> CreateOrderAsync(CreateOrderRequest request)
     {
         // Opretter en ny ordre via POST.
         // Request-objektet bliver sendt som JSON til API'et.
@@ -76,6 +76,17 @@ public class OrderApiService : IOrderService
         // Tjekker om API-kaldet lykkedes.
         // Hvis ikke, bliver der kastet en tydelig fejl.
         await ApiResponseHandler.EnsureSuccessAsync(response);
+
+        // Læser den oprettede ordre fra API-svaret.
+        OrderDto? createdOrder = await response.Content.ReadFromJsonAsync<OrderDto>();
+
+        // Stopper hvis API'et ikke returnerede en ordre som forventet.
+        if (createdOrder is null)
+        {
+            throw new InvalidOperationException("API'et returnerede ikke en oprettet ordre.");
+        }
+
+        return createdOrder;
     }
 
     public async Task UpdateOrderAsync(Guid id, UpdateOrderRequest request)

@@ -15,7 +15,7 @@ public interface IOrderService
 
     Task<IReadOnlyList<OrderDto>> GetOrdersByTotalPriceAsync(decimal totalPrice);
 
-    Task CreateOrderAsync(CreateOrderRequest request);
+    Task<OrderDto> CreateOrderAsync(CreateOrderRequest request);
 
     Task UpdateOrderAsync(Guid id, UpdateOrderRequest request);
 

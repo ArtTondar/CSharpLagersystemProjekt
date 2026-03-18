@@ -1,33 +1,31 @@
 ﻿@page "/orders"
 @using Lagersystem.Blazor.Models.Dtos
+@using Lagersystem.Blazor.Models.ViewModels
 
 <PageTitle>Order</PageTitle>
 
 <div class="outer-container">
 
-    <!-- Side titel -->
     <h4>Ordre Oversigt</h4>
 
-    <!-- Kort info-række -->
     <div class="row filter-labels">
-
         <div class="col-2">
-            <!-- Viser at tabellen henter ordredata fra API'et -->
             <small class="text-muted">Ordre data fra API</small>
         </div>
 
         <div class="col-8"></div>
 
         <div class="col-2">
-            <!-- Viser at knappen bruges til at hente alle ordrer igen -->
             <small class="text-muted">Hent alle ordrer</small>
         </div>
-
     </div>
 
-    <!-- Simpel handlingsrække -->
-    <div class="row order-filters">
+    <button class="btn btn-success"
+            @onclick="OpenCreateOrderPage">
+        Opret ordre
+    </button>
 
+    <div class="row order-filters">
         <div class="col-8"></div>
 
         <div class="col-4">
@@ -37,18 +35,15 @@
                 Genindlæs ordrer
             </button>
         </div>
-
     </div>
 
-    <!-- Fejlbesked hvis API-kald fejler -->
-    @if (HasError)
+    @if (HasPageError)
     {
         <div class="alert alert-danger mt-3">
-            @ErrorMessage
+            @PageErrorMessage
         </div>
     }
 
-    <!-- Loading-besked mens data hentes -->
     @if (IsLoading)
     {
         <div class="mt-3">
@@ -56,14 +51,11 @@
         </div>
     }
 
-    <!-- Ordre tabel -->
     <div class="table-container mt-3">
-
         <table class="table table-striped table-hover">
-
             <thead class="table-primary">
                 <tr>
-                    <th>CustomerId</th>
+                    <th>Kunde</th>
                     <th>OrderDate</th>
                     <th>TotalPrice</th>
                     <th>Actions</th>
@@ -71,8 +63,6 @@
             </thead>
 
             <tbody>
-
-                <!-- Vises hvis listen er tom -->
                 @if (ShowEmptyMessage)
                 {
                     <tr>
@@ -81,16 +71,16 @@
                 }
                 else
                 {
-                    <!-- Udskriver alle ordrer fra API'et -->
                     @foreach (OrderDto order in Orders)
                     {
                         <tr>
-                            <td>@order.CustomerId</td>
+                            <td>@GetCustomerDisplayName(order.CustomerId)</td>
                             <td>@order.OrderDate</td>
                             <td>@order.TotalPrice</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-primary me-1"
-                                        @onclick="() => SelectOrderAsync(order)">
+                                        @onclick="() => SelectOrderAsync(order)"
+                                        disabled="@IsLoading">
                                     Vælg
                                 </button>
 
@@ -103,36 +93,168 @@
                         </tr>
                     }
                 }
-
             </tbody>
-
         </table>
-
     </div>
-    @if (SelectedOrder is not null)
-    {
-        <div class="mt-3">
-            <button class="btn btn-outline-warning"
-                    @onclick="UpdateSelectedOrderAsync"
-                    disabled="@IsLoading">
-                Test opdatering af valgt ordre
-            </button>
-        </div>
-    }
-    <!-- Simpel visning af valgt ordre -->
-    @if (SelectedOrder is not null)
-    {
-        <div class="mt-4">
-            <h5>Valgt ordre</h5>
-
-            <div class="card p-3">
-                <p><strong>Id:</strong> @SelectedOrder.Id</p>
-                <p><strong>CustomerId:</strong> @SelectedOrder.CustomerId</p>
-                <p><strong>OrderDate:</strong> @SelectedOrder.OrderDate</p>
-                <p><strong>TotalPrice:</strong> @SelectedOrder.TotalPrice</p>
-                <p><strong>Antal orderlinjer:</strong> @SelectedOrder.OrderDetails.Count</p>
-            </div>
-        </div>
-    }
 
 </div>
+@if (EditableOrder is not null)
+{
+    <div class="mt-3">
+        <h6>Debug rå ordrelinjer</h6>
+
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>ProductId</th>
+                    <th>Quantity</th>
+                    <th>UnitPrice</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (EditableOrderDetailViewModel detail in EditableOrder.OrderDetails)
+                {
+                    <tr>
+                        <td>@detail.Id</td>
+                        <td>@detail.ProductId</td>
+                        <td>@detail.Quantity</td>
+                        <td>@detail.UnitPrice</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@if (IsEditModalOpen && EditableOrder is not null)
+{
+    <div class="modal-backdrop-custom">
+        <div class="modal-dialog-custom">
+            <div class="modal-content-custom">
+
+                <div class="modal-header-custom">
+                    <h5>Rediger ordre</h5>
+
+                    <button class="btn-close"
+                            @onclick="CloseEditModal">
+                    </button>
+                </div>
+
+                <div class="modal-body-custom">
+                    <div class="mb-3">
+                        <p><strong>Id:</strong> @EditableOrder.Id</p>
+                        <p><strong>Kunde:</strong> @GetCustomerDisplayName(EditableOrder.CustomerId)</p>
+                        <p><strong>CustomerId:</strong> @EditableOrder.CustomerId</p>
+                        <p><strong>OrderDate:</strong> @EditableOrder.OrderDate</p>
+                        <p><strong>TotalPrice:</strong> @EditableOrder.TotalPrice</p>
+                        <p><strong>Antal orderlinjer:</strong> @EditableOrder.OrderDetails.Count</p>
+                    </div>
+
+                    @if (HasModalError)
+                    {
+                        <div class="alert alert-danger">
+                            @ModalErrorMessage
+                        </div>
+                    }
+
+
+                    <div class="card p-3 mb-3">
+                        <h6>Tilføj produkt</h6>
+
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <label class="form-label">Produkt</label>
+                                <select class="form-select" @bind="NewProductId">
+                                    <option value="@Guid.Empty">Vælg produkt</option>
+                                    @foreach (ProductDto product in Products)
+                                    {
+                                        <option value="@product.Id">@product.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Antal</label>
+                                <input class="form-control" type="number" min="1" @bind="NewQuantity" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Pris</label>
+                                <input class="form-control" value="@NewUnitPrice" readonly />
+                            </div>
+
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button class="btn btn-success w-100"
+                                        @onclick="AddOrderDetail"
+                                        type="button">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>Ordredetaljer</h6>
+
+                        @if (EditableOrder.OrderDetails.Count == 0)
+                        {
+                            <p class="text-muted">Ordren har ingen produkter endnu.</p>
+                        }
+                        else if (HasDuplicateProductsWithDifferentPrice())
+                        {
+                            <div class="alert alert-warning">
+                                @GetDuplicateProductPriceError()
+                            </div>
+                        }
+                        else
+                        {
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Produkt</th>
+                                        <th>ProductId</th>
+                                        <th>Quantity</th>
+                                        <th>UnitPrice</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (GroupedOrderDetailViewModel detail in GroupedOrderDetails)
+                                    {
+                                        <tr>
+                                            <td>@detail.ProductName</td>
+                                            <td>@detail.ProductId</td>
+                                            <td>@detail.Quantity</td>
+                                            <td>@detail.UnitPrice</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        @onclick="() => RemoveGroupedProduct(detail.ProductId, detail.UnitPrice)"
+                                                        type="button">
+                                                    Fjern
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal-footer-custom">
+                    <button class="btn btn-secondary"
+                            @onclick="CloseEditModal">
+                        Annuller
+                    </button>
+
+                    <button class="btn btn-primary"
+                            @onclick="UpdateSelectedOrderAsync"
+                            disabled="@IsLoading">
+                        Gem ændringer
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
