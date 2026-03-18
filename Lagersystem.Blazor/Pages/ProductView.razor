@@ -19,7 +19,7 @@
             <em>Henter produkter...</em>
         </div>
     }
-
+    
     <div class="mb-3">
         <button class="btn btn-outline-primary me-2"
                 @onclick="ReloadProductsAsync"
@@ -27,10 +27,13 @@
             Genindlæs produkter
         </button>
 
-        <button class="btn btn-success"
-                @onclick="OpenCreateProductPage">
-            Opret produkt
-        </button>
+        @if (AuthState.IsAdmin)
+        {
+            <button class="btn btn-success"
+                    @onclick="OpenCreateProductPage">
+                Opret produkt
+            </button>
+        }
     </div>
 
     <div class="table-container">
@@ -44,8 +47,12 @@
                     <th>Warehouse</th>
                     <th>UnitStock</th>
                     <th>UnitStatus</th>
-                    <th>Edit</th>
-                    <th>Delete</th>
+
+                    @if (AuthState.IsAdmin)
+                    {
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    }
                 </tr>
             </thead>
 
@@ -53,7 +60,7 @@
                 @if (ShowEmptyMessage)
                 {
                     <tr>
-                        <td colspan="9">Ingen produkter fundet.</td>
+                        <td colspan="@ProductTableColumnCount">Ingen produkter fundet.</td>
                     </tr>
                 }
                 else
@@ -68,19 +75,23 @@
                             <td>@product.Warehouse</td>
                             <td>@product.UnitStock</td>
                             <td>@product.UnitStatus</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary"
-                                        @onclick="() => OpenProduct(product.Id)">
-                                    Vælg
-                                </button>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-danger"
-                                        @onclick="() => DeleteProductAsync(product.Id)"
-                                        disabled="@IsLoading">
-                                    Slet
-                                </button>
-                            </td>
+
+                            @if (AuthState.IsAdmin)
+                            {
+                                <td>
+                                    <button class="btn btn-sm btn-primary"
+                                            @onclick="() => OpenProduct(product.Id)">
+                                        Vælg
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger"
+                                            @onclick="() => DeleteProductAsync(product.Id)"
+                                            disabled="@IsLoading">
+                                        Slet
+                                    </button>
+                                </td>
+                            }
                         </tr>
                     }
                 }

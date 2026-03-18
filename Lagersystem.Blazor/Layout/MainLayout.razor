@@ -6,10 +6,17 @@
     </div>
 
     <main>
-        <div class="top-row px-4 d-flex jusity-content-end">
-            <NavLink class="btn btn-primary" href="login">
-                Login
-            </NavLink> 
+        <div class="top-row px-4 d-flex justify-content-end align-items-center gap-2">
+            @if (AuthState.IsLoggedIn)
+            {
+                <span class="fw-semibold">
+                    @AuthState.DisplayName (@AuthState.Role)
+                </span>
+            }
+
+            <button class="btn btn-primary" @onclick="OpenLoginModal">
+                @(AuthState.IsLoggedIn ? "Bruger" : "Login")
+            </button>
         </div>
 
         <article class="content px-4">
@@ -17,3 +24,5 @@
         </article>
     </main>
 </div>
+
+<LoginModal IsVisible="IsLoginModalOpen" OnClose="CloseLoginModal" />

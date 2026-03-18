@@ -308,3 +308,21 @@ code {
     max-height: 70vh;
     overflow-y: auto;
 }
+
+/* Custom Modal Styles for Login */
+
+.modal-backdrop-custom {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-dialog-custom {
+    width: 100%;
+    max-width: 420px;
+    padding: 1rem;
+}

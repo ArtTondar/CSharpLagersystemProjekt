@@ -44,6 +44,8 @@ public partial class OrderView
     public bool IsEditModalOpen { get; set; }
 
     public EditableOrderViewModel? EditableOrder { get; set; }
+    [Inject]
+    public AuthState AuthState { get; set; } = default!;
 
     private Guid _newProductId;
 
@@ -83,9 +85,12 @@ public partial class OrderView
 
     protected override async Task OnInitializedAsync()
     {
+        await AuthState.LoadCurrentUserAsync();
+
+
+
         await LoadPageDataAsync();
     }
-
     public async Task ReloadOrdersAsync()
     {
         await LoadPageDataAsync();
