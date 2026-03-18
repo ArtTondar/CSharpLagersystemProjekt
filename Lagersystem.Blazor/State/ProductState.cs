@@ -119,7 +119,7 @@ public class ProductState
     }
 
     // --------------------------------------------------------
-    // PRODUCT UPDATES
+    // UPDATE PRODUCT
     // --------------------------------------------------------
     public async Task UpdateProductAsync(Guid id, UpdateProductRequest request)
     {
@@ -174,4 +174,34 @@ public class ProductState
         }
     }
 
+    // --------------------------------------------------------
+    // DELETE PRODUCT
+    // --------------------------------------------------------
+    public async Task DeleteProductAsync(Guid id)
+    {
+        IsLoading = true;
+
+        try
+        {
+            // Kalder service-laget, som sender DELETE-request til API'et.
+            await _productService.DeleteProductAsync(id);
+
+            // Fjerner det slettede produkt fra den lokale liste,
+            // så UI opdateres uden at hente alle produkter igen.
+            Products = Products
+                .Where(product => product.Id != id)
+                .ToList();
+
+            // Nulstiller valgt produkt,
+            // hvis det slettede produkt var valgt.
+            if (SelectedProduct?.Id == id)
+            {
+                SelectedProduct = null;
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 }
