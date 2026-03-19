@@ -313,6 +313,13 @@ public partial class OrderView
     {
         ClearPageError();
 
+        // Guard clause → stop hvis ikke admin
+        if (!AuthState.IsAdmin)
+        {
+            SetPageError("Kun administratorer må slette ordrer.");
+            return;
+        }
+
         try
         {
             await OrderState.DeleteOrderAsync(id);
@@ -322,9 +329,9 @@ public partial class OrderView
                 CloseEditModal();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            SetPageError($"Fejl ved sletning af ordre");
+            SetPageError("Fejl ved sletning af ordre");
         }
     }
 

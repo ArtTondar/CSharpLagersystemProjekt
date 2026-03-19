@@ -84,11 +84,12 @@
                                     Vælg
                                 </button>
 
-                                <button class="btn btn-sm btn-outline-danger"
-                                        @onclick="() => DeleteOrderAsync(order.Id)"
-                                        disabled="@IsLoading">
-                                    Slet
-                                </button>
+                                @if (AuthState.IsAdmin)
+                                {
+                                    <button class="btn btn-danger" @onclick="() => DeleteOrderAsync(order.Id)">
+                                        Slet
+                                    </button>
+                                }
                             </td>
                         </tr>
                     }
