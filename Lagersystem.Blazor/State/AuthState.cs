@@ -19,14 +19,16 @@ public class AuthState
 
     public string Role => CurrentUser?.Role ?? "Ukendt";
 
-    // 👇 NYT
     public event Action? OnChange;
-
-    private void NotifyStateChanged() => OnChange?.Invoke();
 
     public AuthState(ILoginService loginService)
     {
         _loginService = loginService;
+    }
+
+    private void NotifyStateChanged()
+    {
+        OnChange?.Invoke();
     }
 
     public async Task<bool> TryLoginAsync(string email, string password)
@@ -37,15 +39,13 @@ public class AuthState
         {
             CurrentUserDto? user = await _loginService.TryLoginAsync(email, password);
 
-            if (user == null)
+            if (user is null)
             {
                 return false;
             }
 
             CurrentUser = user;
-
-            NotifyStateChanged(); // 👈 vigtigt
-
+            NotifyStateChanged();
             return true;
         }
         finally
@@ -53,27 +53,19 @@ public class AuthState
             IsLoading = false;
         }
     }
+
     public async Task LoadCurrentUserAsync()
     {
-        if (CurrentUser?.IsAuthenticated == true)
-        {
-            return;
-        }
-
         IsLoading = true;
 
         try
         {
             CurrentUser = await _loginService.GetCurrentUserAsync();
-
-            Console.WriteLine(CurrentUser is null
-                ? "CurrentUser is null"
-                : $"CurrentUser loaded: {CurrentUser.Name}, admin: {CurrentUser.IsAdmin}");
-            NotifyStateChanged();
         }
         finally
         {
             IsLoading = false;
+            NotifyStateChanged();
         }
     }
 
@@ -81,7 +73,6 @@ public class AuthState
     {
         await _loginService.LogoutAsync();
         CurrentUser = null;
-
-        NotifyStateChanged(); // 👈 vigtigt
+        NotifyStateChanged();
     }
 }
