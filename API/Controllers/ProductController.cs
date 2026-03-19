@@ -11,10 +11,12 @@ namespace API.Controllers
     public class ProductController : Controller
     {
         private readonly IProductRepository _repo;
+        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductRepository repo)
+        public ProductController(IProductRepository repo, ILogger<ProductController> logger)
         {
             _repo = repo;
+            _logger = logger;
         }
 
         private IActionResult OkOrNotFound<T>(List<T> list)
@@ -27,6 +29,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Retrieving product with id {ProductId}", id);
                 Product? product = await _repo.GetProductById(id);
                 if (product == null)
                 {
@@ -46,12 +49,14 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Retrieving all products");
                 List<Product> products = await _repo.GetProducts();
 
                 return OkOrNotFound(products);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
         }
