@@ -1,7 +1,10 @@
-﻿namespace Lagersystem.Blazor.Services.Abstractions
+﻿using Lagersystem.Blazor.Models.Dtos;
+
+namespace Lagersystem.Blazor.Services.Abstractions;
+
+public interface ILoginService
 {
-    public interface ILoginService
-    {
-        public Task TryLoginAsync(string Email, string Password);
-    }
+    Task<CurrentUserDto?> TryLoginAsync(string email, string password);
+    Task<CurrentUserDto?> GetCurrentUserAsync();
+    Task LogoutAsync();
 }

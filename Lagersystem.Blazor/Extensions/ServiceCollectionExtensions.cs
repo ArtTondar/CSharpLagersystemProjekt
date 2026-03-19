@@ -18,10 +18,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ProductState>();
         services.AddScoped<OrderState>();
-
-        services.AddScoped<LoginState>();
-
         services.AddScoped<CustomerState>();
+        services.AddScoped<AuthState>();
 
         return services;
     }

@@ -1,54 +1,46 @@
-﻿using Lagersystem.Blazor.Models.Dtos;
-using Lagersystem.Blazor.Models.Requests;
-using Lagersystem.Blazor.State;
+﻿using Lagersystem.Blazor.State;
 using Microsoft.AspNetCore.Components;
 
-namespace Lagersystem.Blazor.Pages
+namespace Lagersystem.Blazor.Pages;
+
+public partial class LoginView
 {
-    public partial class LoginView
+    private string Email { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+
+    [Inject]
+    public AuthState AuthState { get; set; } = default!;
+
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    public async Task TryLoginAsync()
     {
+        ClearError();
 
-        private string Email;
-        private string Password;
-        // OrderState bruges som mellemled mellem UI og service-lag.
-        // Komponenten skal ikke selv kende til HttpClient eller API-endpoints.
-        [Inject]
-        public LoginState LoginState { get; set; } = default!;
-
-        // Fejltekst hvis API-kald fejler.
-        public string ErrorMessage { get; set; } = string.Empty;
-
-        // Bruges til at styre om fejlbeskeden skal vises.
-        public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
-
-    
-
-        // Henter den konkrete ordre igen ud fra dens id.
-        // Det er nyttigt hvis man vil vise detaljer eller senere lave edit-view.
-        public async Task TryLoginAsync()
+        try
         {
-            ClearError();
+            bool success = await AuthState.TryLoginAsync(Email, Password);
 
-            try
+            if (!success)
             {
-                await LoginState.TryLoginAsync(Email, Password);
-            }
-            catch (Exception ex)
-            {
-                SetError($"Fejl ved hentning af valgt ordre: {ex.Message}");
+                SetError("Login mislykkedes.");
             }
         }
-
-        // Nulstiller tidligere fejl før et nyt API-kald.
-        private void ClearError()
+        catch (Exception ex)
         {
-            ErrorMessage = string.Empty;
+            SetError($"Fejl under login: {ex.Message}");
         }
+    }
 
-        // Sætter fejlbesked hvis noget går galt.
-        private void SetError(string message)
-        {
-            ErrorMessage = message;
-        }
+    private void ClearError()
+    {
+        ErrorMessage = string.Empty;
+    }
+
+    private void SetError(string message)
+    {
+        ErrorMessage = message;
     }
 }
