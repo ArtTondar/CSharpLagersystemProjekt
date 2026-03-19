@@ -15,10 +15,9 @@ namespace API.Controllers
         {
             _repo = repo;
         }
-
         private IActionResult OkOrNotFound(User? user)
         {
-            return user == null ? NotFound() : Ok(user);
+            return (user == null) ? NotFound() : Ok(user);
         }
 
         [HttpGet("get-user-by-id/{id}")]
@@ -55,12 +54,10 @@ namespace API.Controllers
             try
             {
                 List<User> users = await _repo.GetAll();
-
                 if (users == null || !users.Any())
                 {
                     return NotFound();
                 }
-
                 return Ok(users);
             }
             catch (Exception)
@@ -88,75 +85,30 @@ namespace API.Controllers
             }
         }
 
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
-            {
-                return BadRequest("Email and password are required.");
-            }
-
             User? user = await _repo.GetByEmail(dto.Email);
+            if (user == null || user.Password!= dto.Password)
+                return Unauthorized();
 
-            if (user == null || user.Password != dto.Password)
-            {
-                return Unauthorized("Invalid email or password.");
-            }
-
-            string role = user.IsAdmin ? "Admin" : "Normal";
 
             var claims = new List<Claim>
-{
-            new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, role),
-            new Claim("IsAdmin", user.IsAdmin.ToString())
-             };
+        {
+            new Claim("username", user.Name),
+            new Claim("Role", user.IsAdmin ? "Admin" : "Normal") //xonvert boolean to string
+        };
+
             var identity = new ClaimsIdentity(claims, "Cookies");
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync("Cookies", principal);
 
-            var result = new CurrentUserDto
-            {
-                Name = user.Name,
-                Email = user.Email,
-                Role = user.IsAdmin ? "Admin" : "User",
-                IsAuthenticated = true,
-                IsAdmin = user.IsAdmin
-            };
-
-            return Ok(result);
+            return Ok();
         }
 
-        [HttpGet("me")]
-        public IActionResult GetCurrentUser()
-        {
-            if (User?.Identity?.IsAuthenticated != true)
-            {
-                return Unauthorized();
-            }
-
-            var result = new CurrentUserDto
-            {
-                Name = User.FindFirstValue(ClaimTypes.Name) ?? string.Empty,
-                Email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
-                Role = User.FindFirstValue(ClaimTypes.Role) ?? "Normal",
-                IsAuthenticated = true,
-                IsAdmin = bool.TryParse(User.FindFirst("IsAdmin")?.Value, out bool isAdmin) && isAdmin
-            };
-
-            return Ok(result);
-        }
-
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync("Cookies");
-            return NoContent();
-        }
-
-        [HttpPut("{id}")]
+            [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User user)
         {
             if (!ModelState.IsValid)
