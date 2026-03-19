@@ -85,9 +85,11 @@ public partial class OrderView
 
     protected override async Task OnInitializedAsync()
     {
-        await AuthState.LoadCurrentUserAsync();
-
-
+        if (!AuthState.IsAdmin)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
 
         await LoadPageDataAsync();
     }

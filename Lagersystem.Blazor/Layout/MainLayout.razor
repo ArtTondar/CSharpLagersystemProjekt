@@ -14,7 +14,9 @@
                 </span>
             }
 
-            <button class="btn btn-primary" @onclick="OpenLoginModal">
+            <button type="button"
+                    class="btn btn-primary"
+                    @onclick="OpenLoginModal">
                 @(AuthState.IsLoggedIn ? "Bruger" : "Login")
             </button>
         </div>
@@ -25,4 +27,4 @@
     </main>
 </div>
 
-<LoginModal IsVisible="IsLoginModalOpen" OnClose="CloseLoginModal" />
+<LoginModal IsVisible="@IsLoginModalOpen" OnClose="CloseLoginModal" />

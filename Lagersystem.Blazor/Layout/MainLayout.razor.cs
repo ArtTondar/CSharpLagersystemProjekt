@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Lagersystem.Blazor.Layout;
 
-public partial class MainLayout
+public partial class MainLayout : IDisposable
 {
     [Inject]
     public AuthState AuthState { get; set; } = default!;
@@ -13,15 +13,12 @@ public partial class MainLayout
     public ILoginService LoginService { get; set; } = default!;
 
     private bool IsLoginModalOpen;
+
     protected override void OnInitialized()
     {
-        AuthState.OnChange += StateHasChanged;
+        AuthState.OnChange += HandleAuthStateChanged;
     }
 
-    public void Dispose()
-    {
-        AuthState.OnChange -= StateHasChanged;
-    }
     protected override async Task OnInitializedAsync()
     {
         await AuthState.LoadCurrentUserAsync();
@@ -30,11 +27,23 @@ public partial class MainLayout
     private void OpenLoginModal()
     {
         IsLoginModalOpen = true;
+        StateHasChanged();
     }
 
     private Task CloseLoginModal()
     {
         IsLoginModalOpen = false;
+        StateHasChanged();
         return Task.CompletedTask;
+    }
+
+    private void HandleAuthStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthState.OnChange -= HandleAuthStateChanged;
     }
 }

@@ -29,8 +29,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication("Cookies")
     .AddCookie("Cookies", options =>
     {
-        options.Cookie.SameSite = SameSiteMode.None; // allow cross-site
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS required
+        options.Cookie.Name = "LagersystemAuth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
 builder.Services.AddAuthorization();

@@ -53,12 +53,28 @@ public class AuthState
             IsLoading = false;
         }
     }
-
     public async Task LoadCurrentUserAsync()
     {
-        CurrentUser = await _loginService.GetCurrentUserAsync();
+        if (CurrentUser?.IsAuthenticated == true)
+        {
+            return;
+        }
 
-        NotifyStateChanged(); // 👈 vigtigt
+        IsLoading = true;
+
+        try
+        {
+            CurrentUser = await _loginService.GetCurrentUserAsync();
+
+            Console.WriteLine(CurrentUser is null
+                ? "CurrentUser is null"
+                : $"CurrentUser loaded: {CurrentUser.Name}, admin: {CurrentUser.IsAdmin}");
+            NotifyStateChanged();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     public async Task LogoutAsync()
