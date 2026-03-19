@@ -15,9 +15,7 @@ public partial class ProductView
     // så brugeren kan bekræfte handlingen.
     [Inject]
     public IJSRuntime JS { get; set; } = default!;
-    // AuthState Injectes for at tjekke brugerens rolle og tilladelser, hvis det bliver nødvendigt at skjule eller deaktivere funktioner
-    [Inject]
-    public AuthState AuthState { get; set; } = default!;
+
 
     // ProductState bruges som mellemled mellem UI og service-lag.
     // Komponenten skal kun bede state om data, ikke kalde API direkte.
@@ -43,9 +41,6 @@ public partial class ProductView
 
     // Viser tom-besked når der ikke hentes data, og listen er tom.
     public bool ShowEmptyMessage => !IsLoading && Products.Count == 0;
-    
-    // Helper for at fjerne Edit og Delete hvis man ikke er admin.
-    public int ProductTableColumnCount => AuthState.IsAdmin ? 9 : 7;
 
     // Når siden åbner første gang, hentes alle produkter via GET /api/Product.
     protected override async Task OnInitializedAsync()
@@ -79,13 +74,9 @@ public partial class ProductView
     // hvor redigering og gemning håndteres.
     public void OpenProduct(Guid productId)
     {
-        if (!AuthState.IsAdmin)
-        {
-            return;
-        }
-
         NavigationManager.NavigateTo($"/products/{productId}");
     }
+
 
     // Gemmer valgt produkt i state.
     // Kan stadig beholdes midlertidigt, hvis anden eksisterende kode bruger den.
@@ -97,11 +88,7 @@ public partial class ProductView
     // Navigerer til siden for oprettelse af et nyt produkt.
     public void OpenCreateProductPage()
     {
-        if (!AuthState.IsAdmin)
-        {
-            return;
-        }
-
+        // Navigerer til siden for oprettelse af et nyt produkt.
         NavigationManager.NavigateTo("/products/create");
     }
 
@@ -109,32 +96,29 @@ public partial class ProductView
     // og opdaterer tabellen uden genindlæsning.
     public async Task DeleteProductAsync(Guid productId)
     {
-        if (!AuthState.IsAdmin)
-        {
-            return;
-        }
-
         ClearError();
 
         try
         {
+            // Viser en browser confirm dialog.
             bool confirmed = await JS.InvokeAsync<bool>(
                 "confirm",
                 "Er du sikker på, at du vil slette dette produkt?");
 
+            // Stopper hvis brugeren annullerer.
             if (!confirmed)
             {
                 return;
             }
 
+            // Kalder state-laget for at slette produktet.
             await ProductState.DeleteProductAsync(productId);
         }
-        catch
+        catch (Exception ex)
         {
-            SetError("Fejl ved sletning af produkt");
+            SetError($"Fejl ved sletning af produkt");
         }
     }
-
     // Nulstiller tidligere fejl før et nyt API-kald.
     private void ClearError()
     {

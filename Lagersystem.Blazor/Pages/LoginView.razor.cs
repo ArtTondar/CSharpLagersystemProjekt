@@ -8,12 +8,12 @@ namespace Lagersystem.Blazor.Pages
     public partial class LoginView
     {
 
-        private string Email { get; set; } = string.Empty;
-        private string Password { get; set; } = string.Empty;
+        private string Email;
+        private string Password;
         // OrderState bruges som mellemled mellem UI og service-lag.
         // Komponenten skal ikke selv kende til HttpClient eller API-endpoints.
         [Inject]
-        public AuthState AuthState { get; set; } = default!;
+        public LoginState LoginState { get; set; } = default!;
 
         // Fejltekst hvis API-kald fejler.
         public string ErrorMessage { get; set; } = string.Empty;
@@ -21,7 +21,7 @@ namespace Lagersystem.Blazor.Pages
         // Bruges til at styre om fejlbeskeden skal vises.
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
 
-
+    
 
         // Henter den konkrete ordre igen ud fra dens id.
         // Det er nyttigt hvis man vil vise detaljer eller senere lave edit-view.
@@ -31,18 +31,14 @@ namespace Lagersystem.Blazor.Pages
 
             try
             {
-                bool success = await AuthState.TryLoginAsync(Email, Password);
-
-                if (!success)
-                {
-                    SetError("Login mislykkedes.");
-                }
+                await LoginState.TryLoginAsync(Email, Password);
             }
             catch (Exception ex)
             {
-                SetError($"Fejl under login: {ex.Message}");
+                SetError($"Fejl ved hentning af valgt ordre: {ex.Message}");
             }
         }
+
         // Nulstiller tidligere fejl før et nyt API-kald.
         private void ClearError()
         {
