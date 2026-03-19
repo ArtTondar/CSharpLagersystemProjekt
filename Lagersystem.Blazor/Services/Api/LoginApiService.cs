@@ -1,8 +1,8 @@
 ﻿using Lagersystem.Blazor.Models.Dtos;
 using Lagersystem.Blazor.Services.Abstractions;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using System.Net;
 using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 
 namespace Lagersystem.Blazor.Services.Api
 {
@@ -15,76 +15,42 @@ namespace Lagersystem.Blazor.Services.Api
             _httpClient = httpClient;
         }
 
-        public async Task<CurrentUserDto?> TryLoginAsync(string email, string password)
+        public async Task TryLoginAsync(string Email, string Password)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
-            {
-                Content = JsonContent.Create(new
-                {
-                    email,
-                    password
-                })
-            };
-
-            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
             try
             {
-                HttpResponseMessage response = await _httpClient.SendAsync(request);
-
-                if (!response.IsSuccessStatusCode)
+                // Create request message
+                var request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
                 {
-                    return null;
-                }
+                    Content = JsonContent.Create(new
+                    {
+                        email = Email,
+                        password = Password
+                    })
+                };
 
-                return await response.Content.ReadFromJsonAsync<CurrentUserDto>();
+                // 🔑 Include credentials (cookies) in the browser request
+                request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+                // Send request
+                var response = await _httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Login succeeded, cookie will be stored automatically
+                    Console.WriteLine("Logged in ✅");
+                }
+                else
+                {
+                    Console.WriteLine("Login failed ❌");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
 
-        public async Task<CurrentUserDto?> GetCurrentUserAsync()
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, "api/User/me");
-            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-
-            try
-            {
-                HttpResponseMessage response = await _httpClient.SendAsync(request);
-
-                if (response.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    return null;
-                }
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return null;
-                }
-
-                return await response.Content.ReadFromJsonAsync<CurrentUserDto>();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public async Task LogoutAsync()
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/User/logout");
-            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-
-            try
-            {
-                await _httpClient.SendAsync(request);
-            }
-            catch
-            {
-                // Logout should fail silently in UI service layer.
-            }
-        }
     }
 }
