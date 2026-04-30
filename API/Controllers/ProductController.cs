@@ -37,11 +37,11 @@ namespace API.Controllers
                 }
                 return Ok(product);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 return StatusCode(500, "An error occured while retrieving product.");
             }
-
         }
 
         [HttpGet]

@@ -21,7 +21,16 @@ namespace API.Controllers
 
         private IActionResult OkOrNotFound<T>(List<T> list)
         {
-            return (list == null || !list.Any()) ? NotFound() : Ok(list);
+            if ((list == null || !list.Any()))
+            {
+                _logger.LogWarning("Orders not found");
+                return NotFound();
+            }
+            else
+            {
+                _logger.LogInformation("Orders retrieved successfully");
+                return Ok(list);
+            }
         }
 
         [HttpGet("get-order-by-id/{id}")]
@@ -30,12 +39,13 @@ namespace API.Controllers
             try
             {
                 Order? order = await _repo.GetById(id);
-
+                _logger.LogInformation("Fetching order with id {OrderId}", id);
                 if (order == null)
                 {
+                    _logger.LogWarning("Order with id {OrderId} not found", id);
                     return NotFound();
                 }
-
+                _logger.LogInformation("Order with id {OrderId} retrieved successfully", id);
                 return Ok(order);
             }
             catch (Exception ex)
@@ -50,6 +60,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching orders");
                 List<Order> orders = await _repo.GetAll();
                 return OkOrNotFound(orders);
             }
@@ -80,6 +91,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Fetching orders");
                 List<Order> orders = await _repo.GetByDate(startDate, endDate);
                 return OkOrNotFound(orders);
             }
@@ -106,7 +118,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder(Order order)
+        public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
             if (!ModelState.IsValid)
             {
