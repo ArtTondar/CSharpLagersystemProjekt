@@ -1,0 +1,71 @@
+﻿@page "/products/create"
+
+<PageTitle>Opret produkt</PageTitle>
+
+<h3>Opret produkt</h3>
+
+@if (HasError)
+{
+    <div class="alert alert-danger mt-3">
+        @ErrorMessage
+    </div>
+}
+else if (CreateRequest is null)
+{
+    <p>Kunne ikke initialisere formularen.</p>
+}
+else
+{
+    <EditForm Model="CreateRequest" OnValidSubmit="CreateAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Navn</label>
+            <InputText id="name" class="form-control" @bind-Value="CreateRequest.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Beskrivelse</label>
+            <InputText id="description" class="form-control" @bind-Value="CreateRequest.Description" />
+        </div>
+
+        <div class="mb-3">
+            <label for="unitPrice" class="form-label">Pris</label>
+            <InputNumber id="unitPrice" class="form-control" @bind-Value="CreateRequest.UnitPrice" />
+        </div>
+
+        <div class="mb-3">
+            <label for="size" class="form-label">Størrelse</label>
+            <InputNumber id="size" class="form-control" @bind-Value="CreateRequest.Size" />
+        </div>
+
+        <div class="mb-3">
+            <label for="warehouse" class="form-label">Lager</label>
+            <InputText id="warehouse" class="form-control" @bind-Value="CreateRequest.Warehouse" />
+        </div>
+
+        <div class="mb-3">
+            <label for="unitStock" class="form-label">Antal på lager</label>
+            <InputNumber id="unitStock" class="form-control" @bind-Value="CreateRequest.UnitStock" />
+        </div>
+
+        <div class="mb-3">
+            <label for="unitStatus" class="form-label">Status</label>
+            <InputSelect id="unitStatus" class="form-select" @bind-Value="CreateRequest.UnitStatus">
+                @foreach (var status in UnitStatuses)
+                {
+                    <option value="@status">@status</option>
+                }
+            </InputSelect>
+        </div>
+
+        <button type="submit" class="btn btn-primary me-2" disabled="@IsSaving">
+            @(IsSaving ? "Opretter..." : "Opret")
+        </button>
+
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">
+            Annuller
+        </button>
+    </EditForm>
+}

@@ -15,5 +15,22 @@ namespace API.Repositories
             : base(options)
         {
         }
+        //for money precision, up to 4 decimal points, in case this baby goes international!
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<OrderDetail>()
+                .Property(od => od.UnitPrice)
+                .HasPrecision(19, 4);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.TotalPrice)
+                .HasPrecision(19, 4);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.UnitPrice)
+                .HasPrecision(19, 4);
+        }
     }
 }

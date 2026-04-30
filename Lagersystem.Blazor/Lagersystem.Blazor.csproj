@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -10,6 +10,13 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.5" PrivateAssets="all" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="API\" />
+		<Folder Include="Extensions\" />
+		<Folder Include="Services\" />
+		<Folder Include="State\" />
+		<Folder Include="Utilities\" />
 	</ItemGroup>
 
 </Project>

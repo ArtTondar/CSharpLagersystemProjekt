@@ -1,12 +1,24 @@
 ﻿@inherits LayoutComponentBase
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 d-flex justify-content-end align-items-center gap-2">
+            @if (AuthState.IsLoggedIn)
+            {
+                <span class="fw-semibold">
+                    @AuthState.DisplayName (@AuthState.Role)
+                </span>
+            }
+
+            <button type="button"
+                    class="btn btn-primary"
+                    @onclick="OpenLoginModal">
+                @(AuthState.IsLoggedIn ? "Bruger" : "Login")
+            </button>
         </div>
 
         <article class="content px-4">
@@ -14,3 +26,5 @@
         </article>
     </main>
 </div>
+
+<LoginModal IsVisible="@IsLoginModalOpen" OnClose="CloseLoginModal" />

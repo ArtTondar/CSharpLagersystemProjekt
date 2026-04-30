@@ -113,3 +113,198 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* Navigation Buttons */
+.nav-menu-icon {
+    margin-right: 15px;
+    font-size: 1.25rem;
+    margin-bottom: 25px;
+}
+
+/* Outer Container */
+.outer-container {
+    margin: 40px auto;
+    padding: 25px;
+    width: 95%;
+    background-color: #efefef;
+    border: 1px solid #cfcfcf;
+    min-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.outer-container h4 {
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Table Container */
+.table-container {
+    margin-top: 25px;
+}
+
+/* Pagination Container */
+.pagination-container {
+    margin-top: auto;
+    margin-bottom: 20px;
+}
+
+/* Page Label */
+.page-label {
+    font-weight: 500;
+}
+
+/* Page Number */
+.page-number {
+    display: inline-block;
+    padding: 4px 12px;
+    margin: 0 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f3f3f3;
+}
+
+/* Remove the Bootstrap padding only for the Home page */
+.content:has(.home-background) {
+    padding: 0 !important;
+}
+
+/* Background image */
+.home-background {
+    height: calc(100vh - 56px);
+    width: 100%;
+    background-image: url('/images/shipping.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Center text inside the background */
+.home-text {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    background-color: rgba(0, 32, 96, 0.40);
+    padding: 40px;
+}
+
+/* Large main title */
+.home-text h1 {
+    font-size: 4rem;
+    font-weight: 700;
+}
+
+/* Subtitle */
+.home-text h2 {
+    font-size: 2rem;
+    font-weight: 400;
+}
+
+/* Login Page */
+.login-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    background-color: #efefef;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+/* Login Title */
+.login-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* .login Subtitle */
+.login-subtitle {
+    margin-bottom: 30px;
+}
+
+/* Login Fields */
+.login-field {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.login-field label {
+    font-weight: 500;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Login Button */
+.login-button {
+    width: 100%;
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+/* Footer text */
+.login-footer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Custom Modal Styles for popup Order Viewing */
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+.modal-dialog-custom {
+    width: 90%;
+    max-width: 900px;
+}
+
+.modal-content-custom {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modal-header-custom,
+.modal-footer-custom {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer-custom {
+    border-top: 1px solid #dee2e6;
+    border-bottom: none;
+    display: flex;
+    justify-content: end;
+    gap: 0.5rem;
+}
+
+.modal-body-custom {
+    padding: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
